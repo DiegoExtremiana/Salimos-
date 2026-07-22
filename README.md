@@ -8,8 +8,12 @@ las respuestas. Sin Excel, sin ficheros, sin backend propio.
 
 - La **cara pública** es una broma (parodia de SaaS corporativo). Así la página
   queda "escondida" en tu portafolio: quien entre sin invitación solo ve el chiste.
-- La **app real** aparece solo al abrir un **enlace de invitación** (`?i=<slug>`),
-  que además **saluda por el nombre**: *"Oye Laura, una pregunta rapidísima"*.
+- La **app real** aparece de dos maneras, y cada cita se etiqueta con su **categoría**:
+  - **La pedí yo** (`pedida_por_mi`): abren un **enlace de invitación** (`?i=<slug>`)
+    que yo he pasado; además **saluda por el nombre**: *"Oye Laura, una pregunta rapidísima"*.
+  - **Me la pidieron** (`pedida_a_mi`): alguien entra en la landing, pulsa
+    **"Crea tu cita"** y rellena **nombre + Instagram/teléfono** (ambos
+    obligatorios). Ese contacto se guarda **cifrado** y solo se ve en el panel.
 
 ## Flujo
 
@@ -47,9 +51,16 @@ Dentro (tema oscuro, estilo "Diegoncurso"):
 
 ## Datos guardados (tabla `citas`)
 
-`created_at` (fecha y hora), `nombre`, `mote`, `salimos`, `plan` (Vamos a),
-`tipo`, `franja` (horario), `antojo` (Me apetece), `sitio`, `ubicacion`,
-área marcada (`area_lat/lon/radio` o `area_bbox`), `nota` (/10) y `notas_admin`.
+`created_at` (cuándo se registró), `categoria` (la pedí yo / me la pidieron),
+`fecha_cita` (día y hora de la cita, elegidos en el mapa), `nombre`, `mote`,
+`contacto_cif` (Instagram/teléfono **cifrado**, solo landing), `salimos`,
+`plan` (Vamos a), `tipo`, `franja` (horario), `antojo` (Me apetece), `sitio`,
+`ubicacion`, área marcada (`area_lat/lon/radio` o `area_bbox`), `nota` (/10) y
+`notas_admin`.
+
+El contacto se cifra con `pgp_sym_encrypt` (pgcrypto). La clave vive en la tabla
+`app_config` (se crea en `seed_admin.sql`, fuera del repo) y solo la usan las
+funciones del servidor; el panel lo muestra descifrado tras validar el token.
 
 > La ubicación exacta se usa **solo en el navegador** para buscar sitios.
 > A la base de datos solo llega, como mucho, la **zona/ciudad** y el área que la
@@ -78,10 +89,12 @@ connection string **no** están en el repo ni deben estarlo.
 1. **Esquema** — en Supabase → *SQL Editor*, pega y ejecuta
    [supabase/migrations/0001_init.sql](supabase/migrations/0001_init.sql).
    (O con la CLI: `supabase link --project-ref fwdotxksqpyhsosdnbld` y `supabase db push`.)
-2. **Usuario admin** — ejecuta **una vez** `supabase/seed_admin.sql`
-   (crea `Diego` con la contraseña cifrada en bcrypt). Ese archivo está en
+2. **Usuario admin + clave de cifrado** — ejecuta **una vez**
+   `supabase/seed_admin.sql`: crea `Diego` (contraseña bcrypt) y genera la
+   **clave de cifrado** del contacto en `app_config`. Ese archivo está en
    `.gitignore`: **no se sube al repo público**. Para cambiar la contraseña,
-   edita el texto entre comillas y vuelve a ejecutarlo.
+   edita el texto entre comillas y vuelve a ejecutarlo. **No** regeneres la clave
+   de cifrado o no podrás descifrar los contactos ya guardados.
    - Revisar usuarios: `select id, usuario, created_at from public.usuarios;`
 3. **Pages** — *Settings → Pages → Source: GitHub Actions*. `push` a `main` y listo:
    `https://diegoextremiana.github.io/Salimos-/`

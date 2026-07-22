@@ -11,6 +11,9 @@
 
 const cita = {
   invitacionId: null,
+  categoria: null,       // 'pedida_por_mi' (invitación) | 'pedida_a_mi' (landing)
+  contacto: '',          // Instagram/teléfono (solo flujo landing)
+  fechaCita: null,       // día y hora de la cita (ISO)
   nombre: '',
   mote: '',
   meal: null,
@@ -90,6 +93,7 @@ async function resolverInvitacion() {
     if (error || !data || !data.length) return false;
     const inv = data[0];
     cita.invitacionId = inv.id;
+    cita.categoria = 'pedida_por_mi';   // yo pasé el enlace
     cita.nombre = inv.nombre || '';
     cita.mote = inv.mote || '';
     return true;
@@ -109,11 +113,31 @@ function setupBroma() {
     '* Demo no disponible. El becario se fue a comer.',
     '* Estamos en ronda semilla. La ronda es de croquetas.',
     '* Certificación ISO-9001 en proceso (desde 1998).',
-    '* Si tienes un enlace personal, ábrelo. Si no, disfruta del PowerPoint.',
+    '* Si tienes un enlace personal, ábrelo. Si no, crea tu cita ahí arriba.',
   ];
   let i = 0;
-  const btn = document.getElementById('btn-demo');
-  if (btn) btn.addEventListener('click', () => { i = (i + 1) % chistes.length; hint.textContent = chistes[i]; });
+  const demo = document.getElementById('btn-demo');
+  if (demo) demo.addEventListener('click', () => { i = (i + 1) % chistes.length; hint.textContent = chistes[i]; });
+
+  // "Crea tu cita": alguien te pide cita sin invitación
+  const btnCrear = document.getElementById('btn-crear');
+  const form = document.getElementById('crear-form');
+  const cta = document.getElementById('crear-cta');
+  if (btnCrear) btnCrear.addEventListener('click', () => {
+    cta.hidden = true;
+    form.hidden = false;
+    document.getElementById('crear-nombre').focus();
+  });
+  if (form) form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nombre = document.getElementById('crear-nombre').value.trim();
+    const contacto = document.getElementById('crear-contacto').value.trim();
+    if (!nombre || !contacto) return;   // ambos obligatorios
+    cita.categoria = 'pedida_a_mi';     // me la piden a mí
+    cita.nombre = nombre;
+    cita.contacto = contacto;
+    revelarApp();
+  });
 }
 
 /* ========================= Pantalla 1 — "No" que huye ========================= */
@@ -471,14 +495,23 @@ async function cerrarCita(place) {
   pintarIconos(done);
   lanzarCorazones();
 
+  // fecha y hora de la cita (elegidas en el paso del mapa)
+  const fechaVal = document.getElementById('cita-fecha').value;
+  const horaVal = document.getElementById('cita-hora').value;
+  let fechaCita = null;
+  if (fechaVal) { const d = new Date(`${fechaVal}T${horaVal || '00:00'}`); if (!isNaN(d)) fechaCita = d.toISOString(); }
+
   const params = {
     p_invitacion_id: cita.invitacionId,
+    p_categoria: cita.categoria || null,
     p_nombre: cita.nombre || null,
     p_mote: cita.mote || null,
+    p_contacto: cita.contacto || null,
     p_plan: m.label,
     p_tipo: m.kind,
     p_franja: cita.slot ? `${cita.slot.start}-${cita.slot.end}` : '',
     p_antojo: c.label,
+    p_fecha_cita: fechaCita,
     p_sitio: place ? place.nombre : null,
     p_sitio_lat: place ? place.lat : null,
     p_sitio_lon: place ? place.lon : null,

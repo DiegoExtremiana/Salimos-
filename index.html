@@ -33,8 +33,21 @@
           <div><b>1</b><span>usuario activo</span></div>
           <div><b>∞</b><span>ganas</span></div>
         </div>
-        <button class="btn btn-si" id="btn-demo"><span class="btn-ico" data-icon="sparkle"></span> Solicitar una demo</button>
-        <p class="hint" id="broma-hint">* Si tienes un enlace personal, ábrelo. Si no, disfruta del PowerPoint.</p>
+
+        <div id="crear-cta">
+          <button class="btn btn-si" id="btn-crear"><span class="btn-ico" data-icon="heart"></span> Crea tu cita</button>
+          <button class="btn-ghost-text" id="btn-demo" type="button">…o pide una demo</button>
+        </div>
+
+        <form id="crear-form" class="crear-form" hidden>
+          <p class="crear-title">Preséntate y te monto la cita perfecta.</p>
+          <input id="crear-nombre" type="text" placeholder="Tu nombre" autocomplete="name" required />
+          <input id="crear-contacto" type="text" placeholder="Instagram (@) o teléfono" autocomplete="off" required />
+          <button type="submit" class="btn btn-si"><span class="btn-ico" data-icon="heart"></span> Empezar</button>
+          <p class="crear-note"><span class="inline-ico" data-icon="lock"></span> Solo lo verá la persona que reciba tu cita. Cifrado y a buen recaudo.</p>
+        </form>
+
+        <p class="hint" id="broma-hint">* Si tienes un enlace personal, ábrelo. Si no, crea tu cita ahí arriba.</p>
       </div>
     </section>
 
@@ -94,6 +107,10 @@
             <button id="btn-mylocation" class="btn-ghost" type="button" title="Usar mi ubicación (opcional)"><span data-icon="target"></span></button>
           </div>
           <div id="map" class="map"></div>
+          <div class="cuando-box">
+            <label>¿Qué día? <input type="date" id="cita-fecha" /></label>
+            <label>¿A qué hora? <input type="time" id="cita-hora" /></label>
+          </div>
           <p class="map-help">Dibuja un área si quieres (botones ▢ / ◯ del mapa) y pulsa <b>Buscar aquí</b>. La ubicación es totalmente opcional.</p>
           <div class="map-actions">
             <button id="btn-buscar" class="btn btn-si"><span class="btn-ico" data-icon="search"></span> Buscar aquí</button>

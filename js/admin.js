@@ -15,9 +15,10 @@ let sortDir = 'desc';
 let openId = null;
 
 const COLS = [
-  { k: 'created_at', label: 'Fecha y hora', fmt: fechaHora },
+  { k: 'created_at', label: 'Registrada', fmt: fechaHora },
+  { k: 'categoria',  label: 'Tipo', fmt: fmtCategoria },
+  { k: 'fecha_cita', label: 'Cuándo', fmt: fechaHora },
   { k: 'nombre',     label: 'Nombre' },
-  { k: 'mote',       label: 'Mote' },
   { k: 'plan',       label: 'Vamos a' },
   { k: 'antojo',     label: 'Me apetece' },
   { k: 'franja',     label: 'Horario' },
@@ -44,6 +45,11 @@ function fechaHora(iso) {
 function fmtNota(v) {
   if (v == null || v === '') return '<span class="badge-nota empty">— /10</span>';
   return `<span class="badge-nota">${v}/10</span>`;
+}
+function fmtCategoria(v) {
+  if (v === 'pedida_por_mi') return '<span class="cat cat-mi">La pedí yo</span>';
+  if (v === 'pedida_a_mi') return '<span class="cat cat-ellos">Me la pidieron</span>';
+  return '<span class="cat cat-none">—</span>';
 }
 function randSlug() {
   const a = new Uint8Array(7);
@@ -116,7 +122,7 @@ function filtradas() {
   const q = document.getElementById('q').value.trim().toLowerCase();
   let out = rows;
   if (q) {
-    out = rows.filter((r) => ['nombre', 'mote', 'plan', 'antojo', 'franja', 'ubicacion', 'sitio']
+    out = rows.filter((r) => ['nombre', 'mote', 'plan', 'antojo', 'franja', 'ubicacion', 'sitio', 'contacto', 'categoria']
       .some((k) => String(r[k] || '').toLowerCase().includes(q)));
   }
   const dir = sortDir === 'asc' ? 1 : -1;
@@ -180,8 +186,11 @@ function filaDetalle(r) {
 
   td.innerHTML = `
     <div class="editor">
+      <div><div class="lbl">Categoría</div><div class="val">${fmtCategoria(r.categoria)}</div></div>
+      <div><div class="lbl">Contacto</div><div class="val">${esc(r.contacto) || '<span style="color:var(--muted)">— (solo landing)</span>'}</div></div>
+      <div><div class="lbl">Cuándo (cita)</div><div class="val">${r.fecha_cita ? fechaHora(r.fecha_cita) : '—'}</div></div>
       <div><div class="lbl">Salimos</div><div class="val">${esc(r.salimos) || '—'}</div></div>
-      <div><div class="lbl">Tipo</div><div class="val">${esc(r.tipo) || '—'}</div></div>
+      <div><div class="lbl">Plan</div><div class="val">${esc(r.plan) || '—'} · ${esc(r.antojo) || '—'}</div></div>
       <div><div class="lbl">Sitio</div><div class="val">${esc(r.sitio) || '—'} &nbsp; ${sitioLink}</div></div>
       <div><div class="lbl">Área marcada</div><div class="val">${esc(area)}</div></div>
       <div>

@@ -331,6 +331,36 @@ body {
 .broma-metrics b { font-family: var(--font-title); font-size: 1.8rem; color: var(--tomato); line-height: 1; }
 .broma-metrics span { font-size: 0.72rem; color: var(--ink-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
 
+/* ---------- Landing: "Crea tu cita" ---------- */
+#crear-cta { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.btn-ghost-text {
+  background: none; border: none; color: var(--ink-soft);
+  font-family: var(--font-body); font-weight: 700; font-size: 0.85rem;
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
+.btn-ghost-text:hover { color: var(--tomato); }
+
+.crear-form { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; text-align: center; }
+.crear-title { font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.crear-form input {
+  width: 100%; font-family: var(--font-body); font-size: 1rem; font-weight: 600;
+  color: var(--ink); padding: 13px 16px; border-radius: 14px;
+  border: 1.5px solid var(--line); background: var(--cream); outline: none;
+}
+.crear-form input:focus { border-color: var(--tomato); }
+.crear-form .btn { align-self: center; }
+.crear-note { font-size: 0.78rem; color: var(--ink-soft); font-weight: 600; }
+.crear-note .inline-ico { color: var(--olive); }
+
+/* ---------- Fecha y hora de la cita ---------- */
+.cuando-box { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 14px 0 4px; }
+.cuando-box label { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; font-weight: 700; color: var(--ink-soft); }
+.cuando-box input {
+  font-family: var(--font-body); font-weight: 600; font-size: 0.95rem; color: var(--ink);
+  padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--cream); outline: none;
+}
+.cuando-box input:focus { border-color: var(--tomato); }
+
 /* ---------- Mapa: buscador + área ---------- */
 .map-toolbar { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
 .search-box { position: relative; flex: 1 1 auto; }
