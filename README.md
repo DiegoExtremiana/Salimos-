@@ -49,8 +49,26 @@ Commit automático a  data/citas.csv  +  data/citas.json
 ```
 
 - La Action se ejecuta con el `GITHUB_TOKEN` integrado (no expuesto).
-- Los datos quedan en [data/citas.csv](data/citas.csv) y
-  [data/citas.json](data/citas.json), fáciles de abrir/analizar en el futuro.
+- Los datos quedan en [data/citas.csv](data/citas.csv),
+  [data/citas.json](data/citas.json) y un **Excel** [data/citas.xlsx](data/citas.xlsx)
+  (regenerado con `openpyxl` en cada registro), fáciles de abrir/analizar.
+
+### Ver el registro: página oculta `/citas`
+
+`citas/index.html` es una página **no listada** (nadie enlaza a ella y lleva
+`noindex`). Muestra una tabla con todas las respuestas — **Fecha y hora**,
+**Vamos a**, **Horario**, **Me apetece**, **Ubicación** (ciudad) y **Sitio** — y
+botones para descargar el **Excel**, el CSV o el JSON.
+
+- En Pages: `https://diegoextremiana.github.io/Salimos-/citas/`
+- En local: `http://localhost/citasDiego/citas/`
+
+> ⚠️ Como el repo es público, tanto `data/` como la página `/citas` son
+> **accesibles por cualquiera que sepa la URL**. Es "oculta" (no listada), no
+> "privada". Si quieres que el registro sea privado de verdad, hay que pasar el
+> repo a privado (Pages privado requiere plan de pago) o usar el proxy
+> serverless de la nota de seguridad. Por eso solo se guarda la ciudad, nunca
+> las coordenadas.
 
 ### Puesta en marcha (una sola vez)
 
