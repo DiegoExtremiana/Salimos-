@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#1a1230" />
+  <meta name="theme-color" content="#f5ede0" />
   <title>¿Salimos?</title>
-  <meta name="description" content="La pregunta más importante del universo. Con dos respuestas... bueno, con una." />
+  <meta name="description" content="La pregunta más importante del universo. Con dos respuestas… bueno, con una." />
 
-  <!-- Fuentes -->
+  <!-- Fuentes: Fraunces (elegante y con guasa) + Nunito (redondita) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Leaflet (mapa) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -23,24 +23,26 @@
 
     <!-- Pantalla 1: ¿Salimos? -->
     <section id="screen-salimos" class="screen is-active">
-      <div class="card">
-        <p class="eyebrow">Una pregunta rápida</p>
+      <div class="card card-hero">
+        <span class="badge badge-tilt">psst…</span>
+        <p class="eyebrow">una pregunta rapidísima</p>
         <h1 class="ask">¿Salimos?</h1>
-        <p class="sub">Piénsalo bien. O no, tampoco hay mucho que pensar.</p>
+        <p class="sub">Tú respira hondo. Yo ya sé la respuesta.</p>
         <div class="answers">
-          <button id="btn-si" class="btn btn-si">Sí</button>
-          <button id="btn-no" class="btn btn-no">No</button>
+          <button id="btn-si" class="btn btn-si"><span class="btn-ico" data-icon="heart"></span>Sí</button>
+          <button id="btn-no" class="btn btn-no"><span class="btn-ico" data-icon="close"></span>No</button>
         </div>
-        <p class="hint" id="no-hint">* La opción "No" es más bien decorativa.</p>
+        <p class="hint" id="no-hint">* El "No" está de adorno. Y encima es tímido.</p>
       </div>
     </section>
 
     <!-- Pantalla 2: Vamos a... -->
     <section id="screen-vamos" class="screen">
       <div class="card">
-        <p class="eyebrow">Perfecto ✨</p>
-        <h2 class="ask">Vamos a…</h2>
-        <p class="sub">Elige el plan. Sin presión (mentira, un poco sí).</p>
+        <span class="badge">¡lo sabía!</span>
+        <p class="eyebrow">plan en marcha</p>
+        <h2 class="ask ask-sm">Vamos a…</h2>
+        <p class="sub">Elige sin miedo. Total, ya has dicho que sí.</p>
         <div id="meal-options" class="options"></div>
       </div>
     </section>
@@ -48,43 +50,56 @@
     <!-- Pantalla 3: Me apetece... -->
     <section id="screen-apetece" class="screen">
       <div class="card">
-        <p class="eyebrow" id="apetece-eyebrow">Buena elección</p>
-        <h2 class="ask">Me apetece…</h2>
-        <p class="sub" id="apetece-sub">Dime el antojo y yo me encargo del resto.</p>
+        <span class="badge" id="apetece-badge">mmm…</span>
+        <p class="eyebrow" id="apetece-eyebrow">buena elección</p>
+        <h2 class="ask ask-sm">Me apetece…</h2>
+        <p class="sub" id="apetece-sub">Dime el antojo y yo pongo el GPS.</p>
         <div id="cuisine-options" class="options"></div>
-        <button class="link-back" data-back="screen-vamos">← me lo repienso</button>
+        <button class="link-back" data-back="screen-vamos"><span data-icon="back"></span> me lo repienso</button>
       </div>
     </section>
 
     <!-- Pantalla 4: Resultado -->
     <section id="screen-resultado" class="screen">
       <div class="card card-wide">
-        <p class="eyebrow">Nuestra cita</p>
-        <h2 class="ask" id="plan-title">Cargando planes…</h2>
+        <span class="badge">casi está</span>
+        <p class="eyebrow">nuestra cita</p>
+        <h2 class="ask ask-sm" id="plan-title">Cargando planes…</h2>
         <p class="sub" id="plan-summary"></p>
 
         <div id="geo-status" class="geo-status">
-          <p id="geo-msg">Necesito saber dónde estás para buscar sitios. Prometo no chivarme a nadie. 🤫</p>
-          <button id="btn-geo" class="btn btn-si">Compartir mi ubicación</button>
+          <p id="geo-msg"><span class="inline-ico" data-icon="lock"></span> Necesito saber dónde estás para buscar sitios. Se queda en tu móvil, no se lo cuento a nadie.</p>
+          <button id="btn-geo" class="btn btn-si"><span class="btn-ico" data-icon="pin"></span>Compartir mi ubicación</button>
         </div>
 
         <div id="results-wrap" class="results-wrap" hidden>
           <div id="map" class="map"></div>
+          <p class="results-help">Elige el que más te guste y cerramos la cita 👀</p>
           <ul id="places" class="places"></ul>
         </div>
 
-        <button class="link-back" data-back="screen-apetece">← cambiar antojo</button>
+        <!-- Confirmación final -->
+        <div id="done" class="done" hidden>
+          <span class="done-ico" data-icon="check"></span>
+          <h3 id="done-title">¡Cita cerrada!</h3>
+          <p id="done-text"></p>
+          <p class="footer-note" id="done-log"></p>
+        </div>
+
+        <button class="link-back" data-back="screen-apetece"><span data-icon="back"></span> cambiar antojo</button>
         <p class="footer-note">Hecho con nervios y buenas intenciones.</p>
       </div>
     </section>
 
   </div>
 
-  <!-- Confeti / corazones al decir Sí -->
+  <!-- Efectos (corazones al decir Sí) -->
   <div id="fx" class="fx" aria-hidden="true"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="js/config.js"></script>
+  <script src="js/icons.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
