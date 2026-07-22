@@ -9,3 +9,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Semilla con la contraseña del admin: NUNCA subir al repo público
+supabase/seed_admin.sql

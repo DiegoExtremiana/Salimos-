@@ -471,29 +471,28 @@ async function cerrarCita(place) {
   pintarIconos(done);
   lanzarCorazones();
 
-  const rec = {
-    invitacion_id: cita.invitacionId,
-    nombre: cita.nombre || null,
-    mote: cita.mote || null,
-    salimos: 'sí',
-    plan: m.label,
-    tipo: m.kind,
-    franja: cita.slot ? `${cita.slot.start}-${cita.slot.end}` : '',
-    antojo: c.label,
-    sitio: place ? place.nombre : null,
-    sitio_lat: place ? place.lat : null,
-    sitio_lon: place ? place.lon : null,
-    ubicacion: cita.ubicacionLabel || '',
-    area_lat: cita.area && cita.area.type === 'circle' ? cita.area.lat : null,
-    area_lon: cita.area && cita.area.type === 'circle' ? cita.area.lon : null,
-    area_radio: cita.area && cita.area.type === 'circle' ? cita.area.radio : null,
-    area_bbox: cita.area && cita.area.type === 'rect' ? cita.area.bbox : null,
+  const params = {
+    p_invitacion_id: cita.invitacionId,
+    p_nombre: cita.nombre || null,
+    p_mote: cita.mote || null,
+    p_plan: m.label,
+    p_tipo: m.kind,
+    p_franja: cita.slot ? `${cita.slot.start}-${cita.slot.end}` : '',
+    p_antojo: c.label,
+    p_sitio: place ? place.nombre : null,
+    p_sitio_lat: place ? place.lat : null,
+    p_sitio_lon: place ? place.lon : null,
+    p_ubicacion: cita.ubicacionLabel || '',
+    p_area_lat: cita.area && cita.area.type === 'circle' ? cita.area.lat : null,
+    p_area_lon: cita.area && cita.area.type === 'circle' ? cita.area.lon : null,
+    p_area_radio: cita.area && cita.area.type === 'circle' ? cita.area.radio : null,
+    p_area_bbox: cita.area && cita.area.type === 'rect' ? cita.area.bbox : null,
   };
 
   const logEl = document.getElementById('done-log');
-  if (!window.sb) { console.info('[registro local — sin Supabase]', rec); logEl.textContent = 'Guardado en local (modo prueba).'; return; }
+  if (!window.sb) { console.info('[registro local — sin Supabase]', params); logEl.textContent = 'Guardado en local (modo prueba).'; return; }
   try {
-    const { error } = await window.sb.from('citas').insert(rec);
+    const { error } = await window.sb.rpc('registrar_cita', params);
     logEl.textContent = error ? 'No se pudo registrar (pero la cita sigue en pie).' : 'Cita registrada 📝';
     if (error) console.error(error);
   } catch (e) { logEl.textContent = 'No se pudo registrar (pero la cita sigue en pie).'; console.error(e); }

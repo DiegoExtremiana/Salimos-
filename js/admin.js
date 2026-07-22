@@ -1,12 +1,14 @@
 /* =========================================================
    ¿Salimos? — Panel de administración (/citas)
-   Login con Supabase Auth (sin registro). Visor/editor de la tabla citas
-   y generador de invitaciones. Solo el admin autenticado lee datos (RLS).
+   Login propio contra la BD (funciones RPC con token). Sin Supabase Auth.
+   El token se guarda en localStorage; todo el acceso a datos pasa por
+   funciones SECURITY DEFINER que lo validan en el servidor.
    ========================================================= */
 
 'use strict';
 
-const cfg = window.SALIMOS_CONFIG || {};
+const TOKEN_KEY = 'salimos_admin_token';
+let token = localStorage.getItem(TOKEN_KEY) || null;
 let rows = [];
 let sortKey = 'created_at';
 let sortDir = 'desc';
@@ -48,10 +50,20 @@ function randSlug() {
   crypto.getRandomValues(a);
   return Array.from(a, (b) => (b % 36).toString(36)).join('');
 }
+function requireDB() { return !!window.sb; }
 
 /* ---------- login / sesión ---------- */
-function showLogin() { document.getElementById('login').hidden = false; document.getElementById('panel').hidden = true; document.getElementById('fab').hidden = true; }
-function showPanel() { document.getElementById('login').hidden = true; document.getElementById('panel').hidden = false; document.getElementById('fab').hidden = false; loadCitas(); }
+function showLogin() {
+  document.getElementById('login').hidden = false;
+  document.getElementById('panel').hidden = true;
+  document.getElementById('fab').hidden = true;
+}
+function showPanel() {
+  document.getElementById('login').hidden = true;
+  document.getElementById('panel').hidden = false;
+  document.getElementById('fab').hidden = false;
+  loadCitas();
+}
 
 async function iniciarSesion(e) {
   e.preventDefault();
@@ -59,17 +71,23 @@ async function iniciarSesion(e) {
   errEl.textContent = '';
   const usuario = document.getElementById('usuario').value.trim();
   const clave = document.getElementById('clave').value;
+  if (!requireDB()) { errEl.textContent = 'Supabase no configurado.'; return; }
 
-  if (!window.sb) { errEl.textContent = 'Supabase no configurado.'; return; }
-  if (usuario.toLowerCase() !== String(cfg.adminUser || '').toLowerCase()) {
-    errEl.textContent = 'Usuario o contraseña incorrectos.'; return;
-  }
-  const { error } = await window.sb.auth.signInWithPassword({ email: cfg.adminEmail, password: clave });
-  if (error) { errEl.textContent = 'Usuario o contraseña incorrectos.'; return; }
+  const { data, error } = await window.sb.rpc('login_admin', { p_usuario: usuario, p_clave: clave });
+  if (error || !data) { errEl.textContent = 'Usuario o contraseña incorrectos.'; return; }
+  token = data;
+  localStorage.setItem(TOKEN_KEY, token);
   showPanel();
 }
 
-async function cerrarSesion() { if (window.sb) await window.sb.auth.signOut(); showLogin(); }
+async function cerrarSesion() {
+  try { if (token && window.sb) await window.sb.rpc('logout_admin', { p_token: token }); } catch { /* ignore */ }
+  token = null;
+  localStorage.removeItem(TOKEN_KEY);
+  showLogin();
+}
+
+function sesionCaducada() { token = null; localStorage.removeItem(TOKEN_KEY); showLogin(); }
 
 /* ---------- navegación ---------- */
 function setView(view) {
@@ -84,8 +102,12 @@ function setView(view) {
 async function loadCitas() {
   const tbody = document.getElementById('tbody');
   tbody.innerHTML = '<tr><td class="empty">Cargando…</td></tr>';
-  const { data, error } = await window.sb.from('citas').select('*').order('created_at', { ascending: false });
-  if (error) { tbody.innerHTML = `<tr><td class="empty">Error: ${esc(error.message)}</td></tr>`; return; }
+  const { data, error } = await window.sb.rpc('admin_citas', { p_token: token });
+  if (error) {
+    if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
+    tbody.innerHTML = `<tr><td class="empty">Error: ${esc(error.message)}</td></tr>`;
+    return;
+  }
   rows = data || [];
   renderCitas();
 }
@@ -107,7 +129,6 @@ function filtradas() {
 }
 
 function renderCitas() {
-  // cabecera
   const thead = document.getElementById('thead');
   thead.innerHTML = '<tr>' + COLS.map((c) => {
     const arrow = c.k === sortKey ? (sortDir === 'asc' ? '▲' : '▼') : '↕';
@@ -189,22 +210,26 @@ function filaDetalle(r) {
 async function guardarCita(id, td) {
   const msg = td.querySelector('#ed-msg');
   const notaVal = td.querySelector('#ed-nota').value;
-  const patch = {
-    nota: notaVal === '' ? null : parseInt(notaVal, 10),
-    notas_admin: td.querySelector('#ed-notas').value || null,
-  };
-  const { error } = await window.sb.from('citas').update(patch).eq('id', id);
-  if (error) { msg.style.color = '#ef4444'; msg.textContent = 'Error al guardar.'; return; }
+  const p_nota = notaVal === '' ? null : parseInt(notaVal, 10);
+  const p_notas = td.querySelector('#ed-notas').value || null;
+  const { error } = await window.sb.rpc('admin_actualizar_cita', { p_token: token, p_id: id, p_nota, p_notas });
+  if (error) {
+    if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
+    msg.style.color = '#ef4444'; msg.textContent = 'Error al guardar.'; return;
+  }
   const row = rows.find((r) => r.id === id);
-  if (row) Object.assign(row, patch);
+  if (row) { row.nota = p_nota; row.notas_admin = p_notas; }
   msg.style.color = ''; msg.textContent = 'Guardado ✓';
   setTimeout(() => renderCitas(), 500);
 }
 
 async function borrarCita(id) {
   if (!confirm('¿Borrar esta cita del registro? No se puede deshacer.')) return;
-  const { error } = await window.sb.from('citas').delete().eq('id', id);
-  if (error) { alert('No se pudo borrar: ' + error.message); return; }
+  const { error } = await window.sb.rpc('admin_borrar_cita', { p_token: token, p_id: id });
+  if (error) {
+    if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
+    alert('No se pudo borrar: ' + error.message); return;
+  }
   rows = rows.filter((r) => r.id !== id);
   openId = null;
   renderCitas();
@@ -216,9 +241,12 @@ function urlInvitacion(slug) { return new URL('../?i=' + slug, location.href).hr
 async function loadInvites() {
   const cont = document.getElementById('invite-list');
   cont.innerHTML = '<p class="empty">Cargando…</p>';
-  const { data, error } = await window.sb.from('invitaciones').select('*').order('created_at', { ascending: false });
-  if (error) { cont.innerHTML = `<p class="empty">Error: ${esc(error.message)}</p>`; return; }
-  if (!data.length) { cont.innerHTML = '<p class="empty">Aún no hay invitaciones. Crea una con el clip 📎</p>'; return; }
+  const { data, error } = await window.sb.rpc('admin_invitaciones', { p_token: token });
+  if (error) {
+    if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
+    cont.innerHTML = `<p class="empty">Error: ${esc(error.message)}</p>`; return;
+  }
+  if (!data || !data.length) { cont.innerHTML = '<p class="empty">Aún no hay invitaciones. Crea una con el clip 📎</p>'; return; }
   cont.innerHTML = '';
   data.forEach((inv) => {
     const url = urlInvitacion(inv.slug);
@@ -237,8 +265,11 @@ async function crearInvitacion(e) {
   const mote = document.getElementById('inv-mote').value.trim();
   if (!nombre) return;
   const slug = randSlug();
-  const { error } = await window.sb.from('invitaciones').insert({ slug, nombre, mote: mote || null });
-  if (error) { alert('No se pudo crear: ' + error.message); return; }
+  const { error } = await window.sb.rpc('admin_crear_invitacion', { p_token: token, p_slug: slug, p_nombre: nombre, p_mote: mote });
+  if (error) {
+    if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
+    alert('No se pudo crear: ' + error.message); return;
+  }
   const url = urlInvitacion(slug);
   document.getElementById('invite-url').value = url;
   document.getElementById('invite-result').hidden = false;
@@ -246,8 +277,7 @@ async function crearInvitacion(e) {
 }
 
 async function copiar(text, btn) {
-  try { await navigator.clipboard.writeText(text); }
-  catch { /* fallback silencioso */ }
+  try { await navigator.clipboard.writeText(text); } catch { /* silencioso */ }
   if (btn) { const old = btn.innerHTML; btn.innerHTML = window.svgIcon('check', 'icon'); setTimeout(() => (btn.innerHTML = old), 1200); }
 }
 
@@ -277,10 +307,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('invite-form').addEventListener('submit', crearInvitacion);
   document.getElementById('copy-url').addEventListener('click', () => copiar(document.getElementById('invite-url').value, document.getElementById('copy-url')));
 
-  // ¿Sesión activa?
-  if (window.sb) {
-    const { data } = await window.sb.auth.getSession();
-    if (data && data.session) { showPanel(); return; }
+  // ¿Token guardado y válido?
+  if (token && window.sb) {
+    const { error } = await window.sb.rpc('admin_citas', { p_token: token });
+    if (!error) { showPanel(); return; }
   }
   showLogin();
 });

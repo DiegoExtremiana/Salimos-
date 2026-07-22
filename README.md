@@ -29,10 +29,12 @@ Todos los iconos son **SVG propios** ([js/icons.js](js/icons.js)).
 
 ## Panel de administración — `/citas`
 
-Página **no listada** (`noindex`). Login con **Supabase Auth** (sin registro):
-
-- Usuario: **Diego** (se traduce internamente al email de Supabase Auth).
-- La contraseña la valida Supabase (guardada cifrada con bcrypt, nunca en el código).
+Página **no listada** (`noindex`). Login **propio contra la base de datos**
+(sin registro): usuario y contraseña viven en la tabla `usuarios` de Supabase,
+con la **contraseña cifrada (bcrypt)**. El login se valida en el servidor con la
+función `login_admin`, que devuelve un **token de sesión**; a partir de ahí todo
+el acceso a datos pasa por funciones que exigen ese token. La contraseña **nunca**
+está en el código ni viaja en claro.
 
 Dentro (tema oscuro, estilo "Diegoncurso"):
 
@@ -55,31 +57,33 @@ Dentro (tema oscuro, estilo "Diegoncurso"):
 
 ## Seguridad (RLS)
 
-La [migración](supabase/migrations/0001_init.sql) activa Row Level Security:
+La [migración](supabase/migrations/0001_init.sql) activa Row Level Security en
+**todas** las tablas **sin políticas de cliente**: con la publishable key no se
+puede leer ni escribir ninguna tabla directamente. Todo pasa por funciones
+`SECURITY DEFINER`:
 
-- `citas`: **cualquiera puede INSERTAR** (contestar el formulario), pero
-  **solo el admin autenticado puede LEER / EDITAR / BORRAR**. Los datos sensibles
-  quedan protegidos aunque la publishable key sea pública.
-- `invitaciones`: solo el admin las gestiona. El público resuelve **una** por
-  slug mediante la función `obtener_invitacion` (no puede listar todas).
+- Público: `obtener_invitacion(slug)` (resuelve **una** invitación, no lista
+  todas) y `registrar_cita(...)` (inserta la respuesta). Nada más.
+- Admin (exigen token de `login_admin`): `admin_citas`, `admin_actualizar_cita`,
+  `admin_borrar_cita`, `admin_invitaciones`, `admin_crear_invitacion`.
+- La tabla `usuarios` no es accesible desde el cliente: los hashes de contraseña
+  no se pueden leer ni con la publishable key.
 
-La `publishable key` de Supabase está pensada para vivir en el navegador; la
-seguridad la impone RLS. La **contraseña de la base de datos** y la connection
-string **no** están en el repo ni deben estarlo.
+La `publishable key` está pensada para vivir en el navegador; la seguridad la
+imponen RLS + estas funciones. La **contraseña de la base de datos** y la
+connection string **no** están en el repo ni deben estarlo.
 
 ## Puesta en marcha (una vez)
 
-1. **Base de datos** — en Supabase → *SQL Editor*, pega y ejecuta
+1. **Esquema** — en Supabase → *SQL Editor*, pega y ejecuta
    [supabase/migrations/0001_init.sql](supabase/migrations/0001_init.sql).
    (O con la CLI: `supabase link --project-ref fwdotxksqpyhsosdnbld` y `supabase db push`.)
-2. **Usuario admin** — *Authentication → Users → Add user*:
-   - Email: `diego@salimos.app` (el que mapea el usuario "Diego" en
-     [js/config.js](js/config.js)).
-   - Password: la tuya.
-   - *Auto Confirm User*: sí.
-3. **Cerrar el registro público** — *Authentication → Providers → Email* →
-   desactiva *"Allow new users to sign up"*. Así solo existe el admin.
-4. **Pages** — *Settings → Pages → Source: GitHub Actions*. `push` a `main` y listo:
+2. **Usuario admin** — ejecuta **una vez** `supabase/seed_admin.sql`
+   (crea `Diego` con la contraseña cifrada en bcrypt). Ese archivo está en
+   `.gitignore`: **no se sube al repo público**. Para cambiar la contraseña,
+   edita el texto entre comillas y vuelve a ejecutarlo.
+   - Revisar usuarios: `select id, usuario, created_at from public.usuarios;`
+3. **Pages** — *Settings → Pages → Source: GitHub Actions*. `push` a `main` y listo:
    `https://diegoextremiana.github.io/Salimos-/`
    - App (invitación): `…/Salimos-/?i=<slug>`
    - Admin: `…/Salimos-/citas/`
