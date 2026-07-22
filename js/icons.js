@@ -51,6 +51,19 @@ const ICON_PATHS = {
   sparkle:   '<path d="M12 3l1.8 5.4L19 10l-5.2 1.6L12 17l-1.8-5.4L5 10l5.2-1.6z"/>',
   lock:      '<path d="M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0v3"/>',
   send:      '<path d="M4 12 20 4l-6 16-3-7z"/>',
+  search:    '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  target:    '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+  clip:      '<path d="M20 11.5 11 20.5a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8.5-8.5"/>',
+  logout:    '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  edit:      '<path d="M4 20h4L19 9l-4-4L4 16zM14.5 5.5l4 4"/>',
+  star:      '<path d="M12 3l2.5 5.6L20.5 9l-4.3 4.2 1 6-5.2-2.8L6.8 19.2l1-6L3.5 9l6-.4z"/>',
+  copy:      '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>',
+  plus:      '<path d="M12 5v14M5 12h14"/>',
+  trash:     '<path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M6 7l1 13h10l1-13"/>',
+  area:      '<path d="M4 4h4M4 4v4M20 4h-4M20 4v4M4 20h4M4 20v-4M20 20h-4M20 20v-4M4 12h.01M12 4h.01M20 12h.01M12 20h.01"/>',
+  refresh:   '<path d="M20 11a8 8 0 1 0-.5 4M20 5v6h-6"/>',
+  save:      '<path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/>',
+  user:      '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
 };
 
 function svgIcon(id, cls = 'icon') {

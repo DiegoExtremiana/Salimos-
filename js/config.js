@@ -1,11 +1,13 @@
 /* =========================================================
-   Configuración del registro de citas.
-   ⚠️ NO pongas el token aquí a mano ni lo subas al repo.
-   Este archivo se SOBRESCRIBE automáticamente al desplegar en GitHub Pages
-   (workflow .github/workflows/pages.yml) con el valor del Secret DISPATCH_TOKEN.
-   En local queda vacío → el registro solo se muestra en la consola.
+   Configuración pública de ¿Salimos?
+   La "publishable key" de Supabase está PENSADA para el navegador:
+   es pública y la seguridad la impone RLS en la base de datos.
+   NO pongas aquí la contraseña de la base de datos ni claves secretas.
    ========================================================= */
 window.SALIMOS_CONFIG = {
-  repo: 'DiegoExtremiana/Salimos-',
-  token: '', // inyectado en el despliegue; vacío en local
+  supabaseUrl: 'https://fwdotxksqpyhsosdnbld.supabase.co',
+  supabaseKey: 'sb_publishable_EwOOfmK6CHis0dGPTmxILA_Jqi22Qbk',
+  // Usuario "Diego" del login se traduce a este email de Supabase Auth.
+  adminUser: 'Diego',
+  adminEmail: 'diego@salimos.app',
 };

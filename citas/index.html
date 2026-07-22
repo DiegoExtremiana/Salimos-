@@ -4,102 +4,124 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="theme-color" content="#f5ede0" />
-  <title>Registro de citas</title>
+  <meta name="theme-color" content="#0a1420" />
+  <title>Salimos · Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
 </head>
 <body>
-  <div class="panel">
-    <h1>Registro de citas</h1>
-    <p class="lead">Todo lo que se ha contestado en el formulario. Página no listada.</p>
 
-    <div class="toolbar">
-      <span class="count" id="count">Cargando…</span>
-      <a class="dl" href="../data/citas.xlsx" download><span data-icon="send"></span> Excel (.xlsx)</a>
-      <a class="dl" href="../data/citas.csv" download><span data-icon="send"></span> CSV</a>
-      <a class="dl" href="../data/citas.json" download><span data-icon="send"></span> JSON</a>
-    </div>
-
-    <div class="table-wrap">
-      <table class="citas">
-        <thead>
-          <tr>
-            <th>Fecha y hora</th>
-            <th>Vamos a</th>
-            <th>Horario</th>
-            <th>Me apetece</th>
-            <th>Ubicación</th>
-            <th>Sitio</th>
-          </tr>
-        </thead>
-        <tbody id="rows">
-          <tr><td colspan="6" class="empty">Cargando registro…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <a class="back-home" href="../"><span data-icon="back"></span> volver a la app</a>
+  <!-- LOGIN -->
+  <div id="login" class="login-wrap">
+    <form id="login-form" class="login-card">
+      <div class="brand"><span data-icon="lock"></span><b>Salimos · Admin</b></div>
+      <h1>Acceso privado</h1>
+      <p class="hint">Zona de gestión. Solo administrador.</p>
+      <div class="field">
+        <label for="usuario">Usuario</label>
+        <input id="usuario" type="text" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label for="clave">Contraseña</label>
+        <input id="clave" type="password" autocomplete="current-password" required />
+      </div>
+      <button type="submit" class="btn-primary"><span data-icon="logout"></span> Entrar</button>
+      <p class="login-error" id="login-error"></p>
+    </form>
   </div>
 
+  <!-- PANEL -->
+  <div id="panel" class="admin" hidden>
+    <aside class="sidebar">
+      <div class="logo"><span class="dot" data-icon="heart"></span> Salimos</div>
+      <button class="nav-item active" data-view="citas"><span data-icon="area"></span> Citas</button>
+      <button class="nav-item" data-view="invitaciones"><span data-icon="clip"></span> Invitaciones</button>
+      <div class="spacer"></div>
+      <button class="nav-item" id="btn-logout"><span data-icon="logout"></span> Salir</button>
+    </aside>
+
+    <main class="main">
+      <!-- Vista Citas -->
+      <section id="view-citas">
+        <div class="topbar">
+          <h2><span data-icon="area"></span> Registro de citas</h2>
+          <div class="spacer"></div>
+          <button class="btn-line" id="btn-refresh"><span data-icon="refresh"></span> Actualizar lista</button>
+        </div>
+        <div class="card">
+          <div class="controls">
+            <div class="searchbar">
+              <span data-icon="search"></span>
+              <input id="q" type="text" placeholder="Buscar por nombre, mote, plan, antojo, ubicación…" />
+            </div>
+            <span class="count" id="count">—</span>
+            <label class="perpage">Ver:
+              <select id="perpage">
+                <option>10</option><option selected>20</option><option>50</option><option value="0">Todas</option>
+              </select>
+            </label>
+          </div>
+          <div class="table-wrap">
+            <table class="db">
+              <thead id="thead"></thead>
+              <tbody id="tbody"><tr><td class="empty">Cargando…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vista Invitaciones -->
+      <section id="view-invitaciones" hidden>
+        <div class="topbar">
+          <h2><span data-icon="clip"></span> Invitaciones</h2>
+          <div class="spacer"></div>
+          <button class="btn-line" id="btn-new-invite"><span data-icon="plus"></span> Nueva invitación</button>
+        </div>
+        <div class="card">
+          <div id="invite-list" class="invite-grid"><p class="empty">Cargando…</p></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- FAB clip -->
+  <button id="fab" class="fab" hidden title="Nueva invitación"><span data-icon="clip"></span></button>
+
+  <!-- Modal invitación -->
+  <div id="modal" class="modal-back" hidden>
+    <div class="modal">
+      <button class="modal-close" id="modal-close" data-icon="close"></button>
+      <h3><span data-icon="clip"></span> Nueva invitación</h3>
+      <p class="sub">Genera un enlace personal. En la app saludará por el nombre.</p>
+      <form id="invite-form">
+        <div class="field">
+          <label for="inv-nombre">Nombre</label>
+          <input id="inv-nombre" type="text" placeholder="Laura" required />
+        </div>
+        <div class="field">
+          <label for="inv-mote">Mote</label>
+          <input id="inv-mote" type="text" placeholder="la del gimnasio" />
+        </div>
+        <button type="submit" class="btn-primary"><span data-icon="send"></span> Generar enlace</button>
+      </form>
+      <div class="result" id="invite-result" hidden>
+        <div class="field">
+          <label>Enlace generado</label>
+          <div class="invite">
+            <div class="url">
+              <input id="invite-url" type="text" readonly />
+              <button class="icon-btn" id="copy-url" title="Copiar"><span data-icon="copy"></span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/db.js"></script>
   <script src="../js/icons.js"></script>
-  <script>
-    'use strict';
-
-    // Pinta iconos SVG
-    document.querySelectorAll('[data-icon]').forEach((el) => {
-      el.innerHTML = window.svgIcon(el.dataset.icon, 'icon');
-    });
-
-    function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
-
-    function fechaHora(iso) {
-      if (!iso) return '';
-      const d = new Date(iso);
-      if (isNaN(d)) return esc(iso);
-      return d.toLocaleString('es-ES', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-      });
-    }
-
-    async function cargar() {
-      const rows = document.getElementById('rows');
-      const count = document.getElementById('count');
-      let data = [];
-      try {
-        // cache-buster para ver siempre lo último tras cada commit del bot
-        const res = await fetch('../data/citas.json?_=' + Date.now());
-        data = await res.json();
-        if (!Array.isArray(data)) data = [];
-      } catch {
-        rows.innerHTML = '<tr><td colspan="6" class="empty">No se pudo cargar el registro.</td></tr>';
-        count.textContent = '';
-        return;
-      }
-
-      count.textContent = data.length + (data.length === 1 ? ' cita' : ' citas');
-
-      if (!data.length) {
-        rows.innerHTML = '<tr><td colspan="6" class="empty">Aún no hay citas registradas. 🙂</td></tr>';
-        return;
-      }
-
-      // más recientes primero
-      data.sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
-
-      rows.innerHTML = data.map((r) => `
-        <tr>
-          <td>${fechaHora(r.fecha)}</td>
-          <td>${esc(r.plan)}</td>
-          <td>${esc(r.franja)}</td>
-          <td>${esc(r.antojo)}</td>
-          <td>${esc(r.ciudad)}</td>
-          <td class="wrap">${esc(r.sitio)}</td>
-        </tr>`).join('');
-    }
-
-    cargar();
-  </script>
+  <script src="../js/admin.js"></script>
 </body>
 </html>

@@ -1,2 +1,0 @@
-# El Excel es binario: git no debe tocar finales de línea ni intentar diff textual
-*.xlsx binary

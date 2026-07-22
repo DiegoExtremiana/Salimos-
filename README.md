@@ -1,130 +1,114 @@
 # ¿Salimos? 💌
 
-Una página para pedir una cita con estilo (y algo de trampa).
+Una página para pedir una cita con estilo (y algo de trampa). Elegante por
+fuera, bromista por dentro. Estática (GitHub Pages) + **Supabase** para guardar
+las respuestas. Sin Excel, sin ficheros, sin backend propio.
 
-Mandas el enlace, la otra persona responde unas preguntas y la app propone
-sitios reales cerca de ella. Elegante por fuera, bromista por dentro. Cada cita
-cerrada se guarda automáticamente en el propio repo (CSV + JSON) mediante una
-GitHub Action — sin bases de datos externas.
+## Idea
 
-## Cómo funciona
+- La **cara pública** es una broma (parodia de SaaS corporativo). Así la página
+  queda "escondida" en tu portafolio: quien entre sin invitación solo ve el chiste.
+- La **app real** aparece solo al abrir un **enlace de invitación** (`?i=<slug>`),
+  que además **saluda por el nombre**: *"Oye Laura, una pregunta rapidísima"*.
 
-1. **¿Salimos?** — Botones **Sí** y **No**. El **No** huye del cursor por toda
-   la pantalla (ratón y dedo), así que solo se puede decir **Sí**. 😏
+## Flujo
+
+1. **¿Salimos?** — Botones **Sí** y **No**. El **No** huye del cursor
+   deslizándose por toda la pantalla (ratón y dedo). Solo cabe el **Sí**.
 2. **Vamos a…** — Desayunar, Comer, Cenar, Pasear o Tomar algo. Si es comida,
-   se registra la franja horaria:
-   - Desayuno → **09:00 – 11:00**
-   - Comida → **13:30 – 15:00**
-   - Cena → **21:00 – 22:30**
-3. **Me apetece…** — Antojo concreto (Ramen, Sushi, Hamburguesa, Pizza, Tapas…);
-   las opciones cambian según el plan.
-4. **La cita** — Con permiso, se lee la ubicación **solo en el navegador** y se
-   consulta OpenStreetMap para proponer **varios sitios** con mapa y distancias.
-   Al elegir uno, la cita queda cerrada y se registra.
+   se guarda la franja: desayuno `09:00–11:00`, comida `13:30–15:00`,
+   cena `21:00–22:30`.
+3. **Me apetece…** — Antojo concreto (Ramen, Sushi, Hamburguesa…); cambia según
+   el plan.
+4. **La cita** — Mapa con **buscador** (comunidades, ciudades, calles…). Se puede
+   **dibujar un área** (círculo o rectángulo) y buscar dentro solo los sitios que
+   encajan con el plan. **La ubicación es siempre opcional**: se puede cerrar la
+   cita sin elegir sitio.
 
-Todos los iconos son **SVG propios** (línea, sin dependencias externas), en
-[js/icons.js](js/icons.js).
+Todos los iconos son **SVG propios** ([js/icons.js](js/icons.js)).
 
-## Privacidad
+## Panel de administración — `/citas`
 
-- La ubicación exacta se usa **solo en el navegador** para preguntar a
-  [Overpass / OpenStreetMap](https://overpass-api.de/) qué hay cerca. Nunca se
-  envía a ningún servidor propio ni se guarda.
-- En el registro se guarda, como mucho, la **ciudad** (nunca las coordenadas).
-- Campos registrados: `fecha`, `salimos`, `plan`, `tipo`, `franja`, `antojo`,
-  `ciudad`, `sitio`.
+Página **no listada** (`noindex`). Login con **Supabase Auth** (sin registro):
 
-## Registro automático (GitHub Action, sin base de datos)
+- Usuario: **Diego** (se traduce internamente al email de Supabase Auth).
+- La contraseña la valida Supabase (guardada cifrada con bcrypt, nunca en el código).
 
-Arquitectura, todo dentro de GitHub:
+Dentro (tema oscuro, estilo "Diegoncurso"):
 
-```
-Web (GitHub Pages)
-   │  repository_dispatch  { event_type: "nueva-cita", client_payload: {...} }
-   ▼
-GitHub Action  (.github/workflows/registro.yml)
-   │  node .github/scripts/append.js  → añade fila
-   ▼
-Commit automático a  data/citas.csv  +  data/citas.json
-```
+- **Visor de la base de datos**: tabla con búsqueda, orden por columnas y
+  selector "Ver: N". **Clic en una fila** → se expande y se puede **editar**
+  (incluida la **nota /10** de la cita, que rellenas tú después).
+- **Invitaciones**: botón flotante con un **clip 📎** → rellenas *nombre* y
+  *mote* → genera la **URL personal** (`?i=slug`). Ese nombre y mote se guardan
+  y viajan con las respuestas de quien contesta.
 
-- La Action se ejecuta con el `GITHUB_TOKEN` integrado (no expuesto).
-- Los datos quedan en [data/citas.csv](data/citas.csv),
-  [data/citas.json](data/citas.json) y un **Excel** [data/citas.xlsx](data/citas.xlsx)
-  (regenerado con `openpyxl` en cada registro), fáciles de abrir/analizar.
+## Datos guardados (tabla `citas`)
 
-### Ver el registro: página oculta `/citas`
+`created_at` (fecha y hora), `nombre`, `mote`, `salimos`, `plan` (Vamos a),
+`tipo`, `franja` (horario), `antojo` (Me apetece), `sitio`, `ubicacion`,
+área marcada (`area_lat/lon/radio` o `area_bbox`), `nota` (/10) y `notas_admin`.
 
-`citas/index.html` es una página **no listada** (nadie enlaza a ella y lleva
-`noindex`). Muestra una tabla con todas las respuestas — **Fecha y hora**,
-**Vamos a**, **Horario**, **Me apetece**, **Ubicación** (ciudad) y **Sitio** — y
-botones para descargar el **Excel**, el CSV o el JSON.
+> La ubicación exacta se usa **solo en el navegador** para buscar sitios.
+> A la base de datos solo llega, como mucho, la **zona/ciudad** y el área que la
+> persona haya marcado voluntariamente. Nunca las coordenadas del dispositivo.
 
-- En Pages: `https://diegoextremiana.github.io/Salimos-/citas/`
-- En local: `http://localhost/citasDiego/citas/`
+## Seguridad (RLS)
 
-> ⚠️ Como el repo es público, tanto `data/` como la página `/citas` son
-> **accesibles por cualquiera que sepa la URL**. Es "oculta" (no listada), no
-> "privada". Si quieres que el registro sea privado de verdad, hay que pasar el
-> repo a privado (Pages privado requiere plan de pago) o usar el proxy
-> serverless de la nota de seguridad. Por eso solo se guarda la ciudad, nunca
-> las coordenadas.
+La [migración](supabase/migrations/0001_init.sql) activa Row Level Security:
 
-### Puesta en marcha (una sola vez)
+- `citas`: **cualquiera puede INSERTAR** (contestar el formulario), pero
+  **solo el admin autenticado puede LEER / EDITAR / BORRAR**. Los datos sensibles
+  quedan protegidos aunque la publishable key sea pública.
+- `invitaciones`: solo el admin las gestiona. El público resuelve **una** por
+  slug mediante la función `obtener_invitacion` (no puede listar todas).
 
-1. **Crear un token** de acceso *fine-grained* en GitHub
-   (*Settings → Developer settings → Fine-grained tokens*):
-   - **Resource owner:** tu usuario · **Repository access:** solo `Salimos-`.
-   - **Permisos:** `Contents` → **Read and write** (lo mínimo para
-     `repository_dispatch`).
-2. **Guardarlo como Secret** del repo:
-   *Settings → Secrets and variables → Actions → New repository secret*
-   → nombre **`DISPATCH_TOKEN`**, valor = el token.
-3. **Activar Pages vía Actions:**
-   *Settings → Pages → Build and deployment → Source:* **GitHub Actions**.
-4. `push` a `main` → se despliega en
+La `publishable key` de Supabase está pensada para vivir en el navegador; la
+seguridad la impone RLS. La **contraseña de la base de datos** y la connection
+string **no** están en el repo ni deben estarlo.
+
+## Puesta en marcha (una vez)
+
+1. **Base de datos** — en Supabase → *SQL Editor*, pega y ejecuta
+   [supabase/migrations/0001_init.sql](supabase/migrations/0001_init.sql).
+   (O con la CLI: `supabase link --project-ref fwdotxksqpyhsosdnbld` y `supabase db push`.)
+2. **Usuario admin** — *Authentication → Users → Add user*:
+   - Email: `diego@salimos.app` (el que mapea el usuario "Diego" en
+     [js/config.js](js/config.js)).
+   - Password: la tuya.
+   - *Auto Confirm User*: sí.
+3. **Cerrar el registro público** — *Authentication → Providers → Email* →
+   desactiva *"Allow new users to sign up"*. Así solo existe el admin.
+4. **Pages** — *Settings → Pages → Source: GitHub Actions*. `push` a `main` y listo:
    `https://diegoextremiana.github.io/Salimos-/`
+   - App (invitación): `…/Salimos-/?i=<slug>`
+   - Admin: `…/Salimos-/citas/`
 
-El workflow [pages.yml](.github/workflows/pages.yml) inyecta el token en
-`js/config.js` **durante el despliegue** (desde el Secret), así que el token
-**no se sube nunca al código fuente**.
+## Ocultar del portafolio
 
-### ⚠️ Nota de seguridad (importante)
-
-GitHub Pages es 100 % estático: para que el navegador pueda disparar la Action
-hace falta un token, y ese token **queda visible en el sitio publicado**
-(cualquiera que abra el `js/config.js` de la web puede leerlo).
-
-- Por eso el token debe ser **fine-grained**, limitado a **este único repo** y
-  con **solo `Contents`**. El peor caso de una filtración es que alguien haga
-  commits basura en este repo; se revierte y se **revoca el token** al instante.
-- Si prefieres que el token no sea público, la alternativa es un pequeño proxy
-  serverless (Cloudflare Worker / Netlify Function) que guarde el token como
-  secreto y llame a `repository_dispatch`. Los datos seguirían acabando en el
-  repo. Dilo y lo monto.
-
-Sin token configurado (por ejemplo en local) la app funciona igual, pero el
-registro solo se muestra en la consola del navegador.
+- La raíz muestra la **broma** salvo que haya `?i=<slug>` válido → los enlaces
+  automáticos del portafolio caen en el chiste.
+- Recomendado además: en GitHub, pon una **descripción de repo en tono de broma**
+  y quita el enlace de *homepage* del repo.
 
 ## Ejecutar en local
 
-La geolocalización necesita contexto seguro; `localhost` cuenta:
+`localhost` es contexto seguro (necesario para geolocalización):
 
 ```bash
-# XAMPP: coloca la carpeta en htdocs y abre http://localhost/citasDiego/
-# o con Python:
-python -m http.server 8000    # http://localhost:8000
+# XAMPP: carpeta en htdocs → http://localhost/citasDiego/?i=PRUEBA
+# o Python:
+python -m http.server 8000
 ```
 
 ## Tecnología
 
-- HTML + CSS + JavaScript, sin frameworks ni build.
-- Iconos SVG propios · Fuentes Fraunces + Nunito.
-- [Leaflet](https://leafletjs.com/) + [OpenStreetMap](https://www.openstreetmap.org/) para el mapa.
-- [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) para buscar locales.
-- [Nominatim](https://nominatim.org/) para la ciudad (registro).
-- GitHub Actions para el registro y el despliegue.
+- HTML + CSS + JS, sin frameworks ni build. Iconos SVG propios. Fraunces + Nunito.
+- [Supabase](https://supabase.com/) (Postgres + Auth + RLS) vía `@supabase/supabase-js`.
+- [Leaflet](https://leafletjs.com/) + [Leaflet.draw](https://github.com/Leaflet/Leaflet.draw) + [OpenStreetMap](https://www.openstreetmap.org/).
+- [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) (sitios) y
+  [Nominatim](https://nominatim.org/) (buscador).
 
 ---
 
-Hecho con nervios y buenas intenciones.
+Que salga bien. O, como mínimo, que se coma rico.

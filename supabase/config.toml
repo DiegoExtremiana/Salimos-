@@ -1,0 +1,12 @@
+# Configuración mínima de Supabase CLI.
+# project_id es una etiqueta local; el enlace real se hace con:
+#   supabase link --project-ref fwdotxksqpyhsosdnbld
+project_id = "salimos"
+
+[db]
+# Puerto de la base local (solo para `supabase start`, no afecta al proyecto en la nube)
+port = 54322
+
+[api]
+enabled = true
+schemas = ["public"]
