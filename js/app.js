@@ -278,8 +278,8 @@ function iniciarMapa() {
     position: 'topright',
     draw: {
       polyline: false, polygon: false, marker: false, circlemarker: false,
-      rectangle: { shapeOptions: { color: '#ef5b47', weight: 2 } },
-      circle: { shapeOptions: { color: '#ef5b47', weight: 2 } },
+      rectangle: { shapeOptions: { color: '#d8a657', weight: 2 } },
+      circle: { shapeOptions: { color: '#d8a657', weight: 2 } },
     },
     edit: { featureGroup: capaDibujo, edit: false },
   });
@@ -364,7 +364,7 @@ function usarMiUbicacion() {
       const lat = pos.coords.latitude, lon = pos.coords.longitude;
       cita.center = { lat, lon };
       map.setView([lat, lon], 14);
-      L.circleMarker([lat, lon], { radius: 7, color: '#6f8b3c', fillColor: '#86a84c', fillOpacity: .9, weight: 2 })
+      L.circleMarker([lat, lon], { radius: 7, color: '#d8a657', fillColor: '#e0b96b', fillOpacity: .9, weight: 2 })
         .addTo(capaMarcadores).bindPopup('Por aquí andas');
     },
     () => { btn.classList.remove('loading'); },
@@ -376,24 +376,45 @@ function usarMiUbicacion() {
 function construirFiltro(tags) {
   return Object.entries(tags).map(([k, v]) => (v ? `["${k}"~"${v}",i]` : `["${k}"]`)).join('');
 }
-const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
-async function overpass(query) {
-  let err;
-  for (const url of OVERPASS) {
-    try {
-      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'data=' + encodeURIComponent(query) });
+const OVERPASS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+];
+// Lanza la consulta a todos los mirrors a la vez y devuelve el PRIMERO que
+// responde bien (rápido + fiable). Aborta los demás y corta si nadie contesta.
+async function overpass(query, timeoutMs = 14000) {
+  const controllers = OVERPASS.map(() => new AbortController());
+  const timer = setTimeout(() => controllers.forEach((c) => c.abort()), timeoutMs);
+  const intentos = OVERPASS.map((url, i) =>
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'data=' + encodeURIComponent(query),
+      signal: controllers[i].signal,
+    }).then((res) => {
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      return await res.json();
-    } catch (e) { err = e; }
+      return res.json();
+    })
+  );
+  try {
+    return await Promise.any(intentos);
+  } finally {
+    clearTimeout(timer);
+    controllers.forEach((c) => c.abort());   // cancela los que sigan en vuelo
   }
-  throw err;
 }
 
+let buscando = false;
 async function buscarSitios() {
+  if (buscando) return;                       // evita búsquedas solapadas
   const lista = document.getElementById('places');
+  const btn = document.getElementById('btn-buscar');
+  buscando = true;
+  btn.classList.add('loading');
   document.getElementById('results-wrap').hidden = false;
   document.getElementById('done').hidden = true;
-  lista.innerHTML = `<li class="state-msg">Rastreando ${cita.cuisine.label.toLowerCase()} en la zona…</li>`;
+  lista.innerHTML = `<li class="state-msg loading-msg">Rastreando ${escapar(cita.cuisine.label.toLowerCase())} en la zona…</li>`;
 
   const filtro = construirFiltro(cita.cuisine.osm);
   let query, centro;
@@ -404,29 +425,35 @@ async function buscarSitios() {
     query = `[out:json][timeout:25];(node${filtro}(${cita.area.bbox});way${filtro}(${cita.area.bbox}););out center 60;`;
     centro = cita.center;
   } else {
+    // Sin área dibujada: buscamos en un radio acotado alrededor del centro del
+    // mapa (media diagonal del viewport, entre 800 m y 12 km). Así la consulta
+    // siempre está limitada y Overpass responde rápido aunque el mapa esté lejos.
     const b = map.getBounds();
-    const bbox = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`;
-    query = `[out:json][timeout:25];(node${filtro}(${bbox});way${filtro}(${bbox}););out center 60;`;
-    centro = map.getCenter(); centro = { lat: centro.lat, lon: centro.lng };
+    const c = map.getCenter();
+    centro = { lat: c.lat, lon: c.lng };
+    let radio = Math.round(haversine(c.lat, c.lng, b.getNorth(), b.getEast()));
+    radio = Math.min(12000, Math.max(800, radio || 3000));
+    query = `[out:json][timeout:25];(node${filtro}(around:${radio},${c.lat},${c.lng});way${filtro}(around:${radio},${c.lat},${c.lng}););out center 60;`;
   }
   cita.center = centro;
 
-  let sitios = [];
   try {
     const data = await overpass(query);
-    sitios = normalizar(data.elements || [], centro);
+    const sitios = normalizar(data.elements || [], centro);
+    if (!sitios.length) {
+      lista.innerHTML = `<li class="state-msg">No encuentro ${escapar(cita.cuisine.label.toLowerCase())} en esa zona. Amplía el área o mueve el mapa.</li>`;
+      return;
+    }
+    sitios.sort((a, b) => a.dist - b.dist);
+    const top = sitios.slice(0, 10);
+    pintarLista(top);
+    pintarMapa(top, centro);
   } catch {
     lista.innerHTML = `<li class="state-msg">Los mapas están de siesta. Prueba otra vez en un momento.</li>`;
-    return;
+  } finally {
+    buscando = false;
+    btn.classList.remove('loading');
   }
-  if (!sitios.length) {
-    lista.innerHTML = `<li class="state-msg">No encuentro ${cita.cuisine.label.toLowerCase()} en esa zona. Amplía el área o mueve el mapa.</li>`;
-    return;
-  }
-  sitios.sort((a, b) => a.dist - b.dist);
-  const top = sitios.slice(0, 10);
-  pintarLista(top);
-  pintarMapa(top, centro);
 }
 
 function normalizar(elements, centro) {
@@ -465,12 +492,12 @@ function pintarLista(sitios) {
 }
 function pintarMapa(sitios, centro) {
   capaMarcadores.clearLayers();
-  if (centro) L.circleMarker([centro.lat, centro.lon], { radius: 6, color: '#7d4a6b', fillColor: '#7d4a6b', fillOpacity: .6, weight: 1 }).addTo(capaMarcadores);
+  if (centro) L.circleMarker([centro.lat, centro.lon], { radius: 6, color: '#c98a86', fillColor: '#c98a86', fillOpacity: .6, weight: 1 }).addTo(capaMarcadores);
   const bounds = [];
   sitios.forEach((p, i) => {
     const icon = L.divIcon({
       className: 'pin',
-      html: `<div style="background:#ef5b47;color:#fff;width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;font-weight:800;box-shadow:0 3px 8px rgba(0,0,0,.35)"><span style="transform:rotate(45deg)">${i + 1}</span></div>`,
+      html: `<div style="background:#d8a657;color:#2a141f;width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;font-weight:800;box-shadow:0 3px 8px rgba(0,0,0,.45)"><span style="transform:rotate(45deg)">${i + 1}</span></div>`,
       iconSize: [26, 26], iconAnchor: [13, 26], popupAnchor: [0, -24],
     });
     L.marker([p.lat, p.lon], { icon }).addTo(capaMarcadores).bindPopup(`<b>${escapar(p.nombre)}</b>${p.dist ? '<br>' + fmtDist(p.dist) : ''}`);
@@ -543,7 +570,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-mylocation').addEventListener('click', usarMiUbicacion);
   document.querySelectorAll('.link-back').forEach((b) => { if (b.dataset.back) b.addEventListener('click', () => goTo(b.dataset.back)); });
 
-  // Puerta: la app real solo con invitación válida; si no, se queda la broma.
+  // Puerta: resolvemos la invitación ANTES de pintar nada. Así, si el enlace es
+  // válido, se entra directo a la cita sin que parpadee primero la broma.
+  // (Mientras tanto se ve el splash; al decidir, quitamos 'booting' y aparece.)
   const ok = await resolverInvitacion();
   if (ok) revelarApp();
+  else goTo('screen-broma');
+  document.body.classList.remove('booting');
 });
+
+/* ---------- PWA (instalable, pantalla completa en móvil) ---------- */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}

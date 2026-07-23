@@ -1,8 +1,10 @@
 # ¿Salimos? 💌
 
-Una página para pedir una cita con estilo (y algo de trampa). Elegante por
-fuera, bromista por dentro. Estática (GitHub Pages) + **Supabase** para guardar
-las respuestas. Sin Excel, sin ficheros, sin backend propio.
+Una página para pedir una cita con estilo (y algo de trampa). Estilo
+**"noche romántica"** (vino profundo, oro viejo y rosa; misma temática en toda
+la app) por fuera, bromista por dentro. **Instalable como PWA** (móvil a pantalla
+completa). Estática (GitHub Pages) + **Supabase** para guardar las respuestas.
+Sin Excel, sin ficheros, sin backend propio.
 
 ## Idea
 
@@ -47,7 +49,27 @@ Dentro (tema oscuro, estilo "Diegoncurso"):
   (incluida la **nota /10** de la cita, que rellenas tú después).
 - **Invitaciones**: botón flotante con un **clip 📎** → rellenas *nombre* y
   *mote* → genera la **URL personal** (`?i=slug`). Ese nombre y mote se guardan
-  y viajan con las respuestas de quien contesta.
+  y viajan con las respuestas de quien contesta. Cada invitación se puede
+  **borrar** (papelera 🗑️); las citas ya registradas se conservan (su
+  `invitacion_id` pasa a `null`).
+
+## App instalable (PWA)
+
+Tanto la **app** (raíz) como el **panel** (`/citas`) son **PWA instalables**:
+manifiesto + service worker + iconos propios (dorado sobre vino, en `icons/`).
+Al **añadir a la pantalla de inicio** se abren **a pantalla completa**, sin la
+barra del navegador (`display: standalone`).
+
+- **iOS/Safari**: *Compartir → Añadir a pantalla de inicio*. Safari guarda la
+  **URL actual**, así que si lo añades desde una **invitación** (`?i=slug`), el
+  icono abre **esa** cita a pantalla completa.
+- **Android/Chrome**: aparece *Instalar app* / *Añadir a pantalla de inicio*.
+- El service worker cachea la interfaz (funciona offline la envoltura); Supabase,
+  Leaflet, tiles, Overpass y Nominatim siempre van a la red.
+
+> Ojo: un enlace recién tocado en el móvil **siempre** abre primero en el
+> navegador. Lo de "sin navegador" ocurre **tras** añadirlo a la pantalla de
+> inicio; no se puede quitar el chrome en el primer toque de un enlace normal.
 
 ## Datos guardados (tabla `citas`)
 
@@ -89,6 +111,11 @@ connection string **no** están en el repo ni deben estarlo.
 1. **Esquema** — en Supabase → *SQL Editor*, pega y ejecuta
    [supabase/migrations/0001_init.sql](supabase/migrations/0001_init.sql).
    (O con la CLI: `supabase link --project-ref fwdotxksqpyhsosdnbld` y `supabase db push`.)
+   > **Importante:** si ya lo habías ejecutado antes, **vuelve a ejecutarlo**.
+   > Es idempotente y **recrea `registrar_cita` eliminando versiones viejas**
+   > (si quedaba una firma antigua sin `fecha_cita`, las respuestas no se
+   > guardaban). Tras re-ejecutarlo, la cita se **guarda automáticamente** al
+   > cerrarla. Añade también `admin_borrar_invitacion` (borrar invitaciones).
 2. **Usuario admin + clave de cifrado** — ejecuta **una vez**
    `supabase/seed_admin.sql`: crea `Diego` (contraseña bcrypt) y genera la
    **clave de cifrado** del contacto en `app_config`. Ese archivo está en
@@ -105,8 +132,13 @@ connection string **no** están en el repo ni deben estarlo.
 
 - La raíz muestra la **broma** salvo que haya `?i=<slug>` válido → los enlaces
   automáticos del portafolio caen en el chiste.
+- `noindex, nofollow` en ambas páginas + [`robots.txt`](robots.txt) con
+  `Disallow: /` → fuera de buscadores.
 - Recomendado además: en GitHub, pon una **descripción de repo en tono de broma**
   y quita el enlace de *homepage* del repo.
+- **Excluir del portafolio propio**: como el portafolio lista los repos por la
+  API de GitHub, el `robots.txt` no basta. La exclusión explícita (por *topic*,
+  *archived* o filtro por nombre) se hace **en el repo del portafolio**.
 
 ## Ejecutar en local
 

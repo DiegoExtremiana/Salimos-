@@ -12,7 +12,7 @@ let token = localStorage.getItem(TOKEN_KEY) || null;
 let rows = [];
 let sortKey = 'created_at';
 let sortDir = 'desc';
-let openId = null;
+let openId = null;   // fila de cita expandida en la tabla
 
 const COLS = [
   { k: 'created_at', label: 'Registrada', fmt: fechaHora },
@@ -261,11 +261,26 @@ async function loadInvites() {
     const url = urlInvitacion(inv.slug);
     const div = document.createElement('div');
     div.className = 'invite';
-    div.innerHTML = `<h4>${esc(inv.nombre)}</h4><div class="mote">${esc(inv.mote) || 'sin mote'}</div>` +
-      `<div class="url"><input type="text" readonly value="${esc(url)}" /><button class="icon-btn" title="Copiar">${window.svgIcon('copy', 'icon')}</button></div>`;
-    div.querySelector('.icon-btn').addEventListener('click', () => copiar(url, div.querySelector('.icon-btn')));
+    div.innerHTML =
+      `<div class="invite-head">` +
+        `<div class="invite-who"><h4>${esc(inv.nombre)}</h4><div class="mote">${esc(inv.mote) || 'sin mote'}</div></div>` +
+        `<button class="icon-btn del-btn" title="Borrar invitación">${window.svgIcon('trash', 'icon')}</button>` +
+      `</div>` +
+      `<div class="url"><input type="text" readonly value="${esc(url)}" /><button class="icon-btn copy-btn" title="Copiar">${window.svgIcon('copy', 'icon')}</button></div>`;
+    div.querySelector('.copy-btn').addEventListener('click', () => copiar(url, div.querySelector('.copy-btn')));
+    div.querySelector('.del-btn').addEventListener('click', () => borrarInvitacion(inv.id, inv.nombre));
     cont.appendChild(div);
   });
+}
+
+async function borrarInvitacion(id, nombre) {
+  if (!confirm(`¿Borrar la invitación de ${nombre}? El enlace dejará de funcionar. Las citas ya registradas se conservan.`)) return;
+  const { error } = await window.sb.rpc('admin_borrar_invitacion', { p_token: token, p_id: id });
+  if (error) {
+    if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
+    alert('No se pudo borrar: ' + error.message); return;
+  }
+  loadInvites();
 }
 
 async function crearInvitacion(e) {
@@ -323,3 +338,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   showLogin();
 });
+
+/* ---------- PWA (instalable, pantalla completa) ---------- */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}

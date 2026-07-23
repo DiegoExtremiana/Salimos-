@@ -1,0 +1,4 @@
+# ¿Salimos? es una página privada (broma pública + app por invitación).
+# No queremos que aparezca en buscadores ni en rastreadores.
+User-agent: *
+Disallow: /

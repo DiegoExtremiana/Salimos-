@@ -162,7 +162,20 @@ as $$
   select id, nombre, mote from public.invitaciones where slug = p_slug limit 1;
 $$;
 
-drop function if exists public.registrar_cita(uuid, text, text, text, text, text, text, text, double precision, double precision, text, double precision, double precision, integer, text);
+-- Borra CUALQUIER versión previa de registrar_cita (evita overloads viejos:
+-- si quedaba la firma anterior sin fecha_cita, PostgREST no casaba los 18
+-- parámetros por nombre y la cita no se guardaba). Así el guardado es fiable.
+do $$
+declare r record;
+begin
+  for r in
+    select 'drop function if exists public.' || p.proname ||
+           '(' || pg_get_function_identity_arguments(p.oid) || ') cascade;' as stmt
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.proname = 'registrar_cita'
+  loop execute r.stmt; end loop;
+end $$;
 
 create or replace function public.registrar_cita(
   p_invitacion_id uuid, p_categoria text, p_nombre text, p_mote text, p_contacto text,
@@ -243,6 +256,17 @@ begin
 end;
 $$;
 
+create or replace function public.admin_borrar_invitacion(p_token text, p_id uuid)
+returns void
+language plpgsql security definer set search_path = public, extensions
+as $$
+begin
+  if public.sesion_usuario(p_token) is null then raise exception 'no_autorizado'; end if;
+  -- Las citas ya registradas se conservan (invitacion_id -> null por el FK on delete set null).
+  delete from public.invitaciones where id = p_id;
+end;
+$$;
+
 -- =========================================================
 -- Permisos de ejecución (cliente = rol anon con la publishable key)
 -- =========================================================
@@ -255,3 +279,4 @@ grant execute on function public.admin_actualizar_cita(text, uuid, smallint, tex
 grant execute on function public.admin_borrar_cita(text, uuid)                    to anon, authenticated;
 grant execute on function public.admin_invitaciones(text)                         to anon, authenticated;
 grant execute on function public.admin_crear_invitacion(text, text, text, text)   to anon, authenticated;
+grant execute on function public.admin_borrar_invitacion(text, uuid)              to anon, authenticated;
