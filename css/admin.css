@@ -50,10 +50,11 @@ button { font-family: var(--font); cursor: pointer; }
 [hidden] { display: none !important; }
 
 /* ---------- Login ---------- */
-.login-wrap { min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
+.login-wrap { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 24px; }
 .login-card {
   position: relative;
   width: min(400px, 100%);
+  max-width: 100%;
   background: rgba(46, 22, 34, 0.66); border: 1px solid var(--line);
   border-radius: 22px; padding: 40px 34px;
   box-shadow: 0 40px 90px rgba(0, 0, 0, 0.62);
@@ -81,7 +82,7 @@ button { font-family: var(--font); cursor: pointer; }
 .login-error { color: var(--danger); font-weight: 700; font-size: 0.88rem; margin-top: 12px; min-height: 1.1em; }
 
 /* ---------- Layout ---------- */
-.admin { display: grid; grid-template-columns: 240px 1fr; min-height: 100dvh; }
+.admin { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100dvh; }
 .sidebar {
   background: rgba(0, 0, 0, 0.3); border-right: 1px solid var(--line);
   padding: 22px 16px; display: flex; flex-direction: column; gap: 6px;
@@ -203,10 +204,10 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 
 .modal-back {
   position: fixed; inset: 0; z-index: 900; background: rgba(10, 5, 8, 0.72);
-  display: grid; place-items: center; padding: 20px; backdrop-filter: blur(4px);
+  display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 20px; backdrop-filter: blur(4px);
 }
 .modal {
-  width: min(440px, 100%); background: var(--panel); border: 1px solid var(--line-2);
+  width: min(440px, 100%); max-width: 100%; background: var(--panel); border: 1px solid var(--line-2);
   border-radius: 20px; padding: 30px; box-shadow: 0 40px 90px rgba(0, 0, 0, 0.7);
 }
 .modal h3 { font-family: var(--title); font-weight: 500; font-size: 1.5rem; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
@@ -217,10 +218,40 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 .modal-close:hover { color: var(--text); }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 760px) {
+/* Texto largo no desborda */
+.editor .val, .invite h4, .invite .mote { overflow-wrap: anywhere; }
+
+/* Tablet y móvil: barra lateral pasa a barra superior */
+@media (max-width: 900px) {
   .admin { grid-template-columns: 1fr; }
-  .sidebar { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--line); padding: 12px; }
+  .sidebar {
+    flex-direction: row; align-items: center; gap: 8px; overflow-x: auto;
+    border-right: none; border-bottom: 1px solid var(--line); padding: 12px 14px;
+    position: sticky; top: 0; z-index: 30;
+    background: rgba(20, 10, 15, 0.82);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  }
   .sidebar .logo { display: none; }
   .sidebar .spacer { display: none; }
-  .nav-item { white-space: nowrap; }
+  .nav-item { white-space: nowrap; flex: 0 0 auto; width: auto; }
+  .topbar { flex-wrap: wrap; }
+  .topbar .btn-line { margin-left: auto; }
+}
+
+/* Móvil */
+@media (max-width: 520px) {
+  .main { padding: 16px 14px 92px; }         /* hueco para el FAB */
+  .card { padding: 16px; border-radius: 14px; }
+  .topbar h2 { font-size: 1.3rem; }
+  .controls { gap: 10px; }
+  .searchbar { flex: 1 1 100%; }
+  .controls .perpage { margin-left: auto; }
+  table.db { font-size: 0.84rem; }
+  table.db th, table.db td { padding: 10px 12px; }
+  .editor { grid-template-columns: 1fr; padding: 16px; gap: 14px; }
+  .editor-actions { flex-wrap: wrap; }
+  .invite-grid { grid-template-columns: 1fr; }
+  .modal { padding: 22px; }
+  .fab { right: 16px; bottom: 16px; width: 54px; height: 54px; }
+  .login-card { padding: 32px 24px; }
 }
