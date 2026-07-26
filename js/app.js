@@ -108,26 +108,8 @@ function revelarApp() {
 }
 
 function setupBroma() {
-  const hint = document.getElementById('broma-hint');
-  const chistes = [
-    '* Demo no disponible. El becario se fue a comer.',
-    '* Estamos en ronda semilla. La ronda es de croquetas.',
-    '* Certificación ISO-9001 en proceso (desde 1998).',
-    '* Si tienes un enlace personal, ábrelo. Si no, crea tu cita ahí arriba.',
-  ];
-  let i = 0;
-  const demo = document.getElementById('btn-demo');
-  if (demo) demo.addEventListener('click', () => { i = (i + 1) % chistes.length; hint.textContent = chistes[i]; });
-
-  // "Crea tu cita": alguien te pide cita sin invitación
-  const btnCrear = document.getElementById('btn-crear');
+  // "¿Quedamos?": alguien pide cita sin invitación
   const form = document.getElementById('crear-form');
-  const cta = document.getElementById('crear-cta');
-  if (btnCrear) btnCrear.addEventListener('click', () => {
-    cta.hidden = true;
-    form.hidden = false;
-    document.getElementById('crear-nombre').focus();
-  });
   if (form) form.addEventListener('submit', (e) => {
     e.preventDefault();
     const nombre = document.getElementById('crear-nombre').value.trim();
@@ -278,8 +260,8 @@ function iniciarMapa() {
     position: 'topright',
     draw: {
       polyline: false, polygon: false, marker: false, circlemarker: false,
-      rectangle: { shapeOptions: { color: '#d8a657', weight: 2 } },
-      circle: { shapeOptions: { color: '#d8a657', weight: 2 } },
+      rectangle: { shapeOptions: { color: '#d3b06a', weight: 2 } },
+      circle: { shapeOptions: { color: '#d3b06a', weight: 2 } },
     },
     edit: { featureGroup: capaDibujo, edit: false },
   });
@@ -364,7 +346,7 @@ function usarMiUbicacion() {
       const lat = pos.coords.latitude, lon = pos.coords.longitude;
       cita.center = { lat, lon };
       map.setView([lat, lon], 14);
-      L.circleMarker([lat, lon], { radius: 7, color: '#d8a657', fillColor: '#e0b96b', fillOpacity: .9, weight: 2 })
+      L.circleMarker([lat, lon], { radius: 7, color: '#d3b06a', fillColor: '#e4c78a', fillOpacity: .9, weight: 2 })
         .addTo(capaMarcadores).bindPopup('Por aquí andas');
     },
     () => { btn.classList.remove('loading'); },
@@ -492,12 +474,12 @@ function pintarLista(sitios) {
 }
 function pintarMapa(sitios, centro) {
   capaMarcadores.clearLayers();
-  if (centro) L.circleMarker([centro.lat, centro.lon], { radius: 6, color: '#c98a86', fillColor: '#c98a86', fillOpacity: .6, weight: 1 }).addTo(capaMarcadores);
+  if (centro) L.circleMarker([centro.lat, centro.lon], { radius: 6, color: '#7d1f30', fillColor: '#7d1f30', fillOpacity: .6, weight: 1 }).addTo(capaMarcadores);
   const bounds = [];
   sitios.forEach((p, i) => {
     const icon = L.divIcon({
       className: 'pin',
-      html: `<div style="background:#d8a657;color:#2a141f;width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;font-weight:800;box-shadow:0 3px 8px rgba(0,0,0,.45)"><span style="transform:rotate(45deg)">${i + 1}</span></div>`,
+      html: `<div style="background:#d3b06a;color:#241a0c;width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;font-weight:800;box-shadow:0 3px 8px rgba(0,0,0,.5)"><span style="transform:rotate(45deg)">${i + 1}</span></div>`,
       iconSize: [26, 26], iconAnchor: [13, 26], popupAnchor: [0, -24],
     });
     L.marker([p.lat, p.lon], { icon }).addTo(capaMarcadores).bindPopup(`<b>${escapar(p.nombre)}</b>${p.dist ? '<br>' + fmtDist(p.dist) : ''}`);

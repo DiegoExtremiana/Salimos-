@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#1e1017" />
+  <meta name="theme-color" content="#0c0a09" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Salimos™</title>
-  <meta name="description" content="Plataforma líder en toma de decisiones bilaterales de ocio." />
+  <title>¿Salimos?</title>
+  <meta name="description" content="¿Quedamos?" />
 
   <!-- PWA: instalable y a pantalla completa (sin barra del navegador una vez añadida a inicio) -->
   <link rel="manifest" href="manifest.webmanifest" />
@@ -36,33 +36,19 @@
 
   <div class="stage">
 
-    <!-- Pantalla 0: BROMA (cara pública, se oculta del portafolio) -->
+    <!-- Pantalla 0: Entrada (sin invitación personal) -->
     <section id="screen-broma" class="screen">
       <div class="card card-hero broma">
-        <span class="badge badge-tilt">v1998.4</span>
-        <p class="eyebrow">Salimos™ Enterprise Suite</p>
-        <h1 class="ask ask-sm">La plataforma líder en toma de decisiones bilaterales de ocio</h1>
-        <p class="sub">Sinergias afectivas escalables, con IA, blockchain y una pizca de vergüenza. Acceso solo con invitación.</p>
-        <div class="broma-metrics">
-          <div><b id="m1">98.4%</b><span>de síes garantizados*</span></div>
-          <div><b>1</b><span>usuario activo</span></div>
-          <div><b>∞</b><span>ganas</span></div>
-        </div>
+        <p class="eyebrow">antes de nada</p>
+        <h1 class="ask ask-sm">¿Quedamos?</h1>
+        <p class="sub">Dime tu nombre y cómo encontrarte. Yo me encargo del resto.</p>
 
-        <div id="crear-cta">
-          <button class="btn btn-si" id="btn-crear"><span class="btn-ico" data-icon="heart"></span> Crea tu cita</button>
-          <button class="btn-ghost-text" id="btn-demo" type="button">…o pide una demo</button>
-        </div>
-
-        <form id="crear-form" class="crear-form" hidden>
-          <p class="crear-title">Preséntate y te monto la cita perfecta.</p>
+        <form id="crear-form" class="crear-form">
           <input id="crear-nombre" type="text" placeholder="Tu nombre" autocomplete="name" required />
           <input id="crear-contacto" type="text" placeholder="Instagram (@) o teléfono" autocomplete="off" required />
           <button type="submit" class="btn btn-si"><span class="btn-ico" data-icon="heart"></span> Empezar</button>
-          <p class="crear-note"><span class="inline-ico" data-icon="lock"></span> Solo lo verá la persona que reciba tu cita. Cifrado y a buen recaudo.</p>
+          <p class="crear-note"><span class="inline-ico" data-icon="lock"></span> Solo lo verá la persona que reciba tu cita.</p>
         </form>
-
-        <p class="hint" id="broma-hint">* Si tienes un enlace personal, ábrelo. Si no, crea tu cita ahí arriba.</p>
       </div>
     </section>
 
