@@ -59,6 +59,7 @@ create table if not exists public.citas (
   sitio         text,
   sitio_lat     double precision,
   sitio_lon     double precision,
+  sitio_web     text,                  -- web o catálogo del sitio, si OSM la trae
   ubicacion     text,
   area_lat      double precision,
   area_lon      double precision,
@@ -73,6 +74,7 @@ alter table public.citas add column if not exists categoria    text;
 alter table public.citas add column if not exists contacto_cif bytea;
 alter table public.citas add column if not exists fecha_cita   timestamptz;
 alter table public.citas add column if not exists foto_url     text;
+alter table public.citas add column if not exists sitio_web    text;
 create index if not exists citas_created_idx on public.citas (created_at desc);
 
 -- ---------- RLS: activada y SIN políticas de cliente ----------
@@ -184,7 +186,7 @@ end $$;
 create or replace function public.registrar_cita(
   p_invitacion_id uuid, p_categoria text, p_nombre text, p_mote text, p_contacto text,
   p_plan text, p_tipo text, p_franja text, p_antojo text, p_fecha_cita timestamptz,
-  p_sitio text, p_sitio_lat double precision, p_sitio_lon double precision,
+  p_sitio text, p_sitio_lat double precision, p_sitio_lon double precision, p_sitio_web text,
   p_ubicacion text, p_area_lat double precision, p_area_lon double precision,
   p_area_radio integer, p_area_bbox text
 ) returns void
@@ -193,10 +195,10 @@ as $$
 begin
   insert into public.citas
     (invitacion_id, categoria, nombre, mote, contacto_cif, salimos, plan, tipo, franja, antojo,
-     fecha_cita, sitio, sitio_lat, sitio_lon, ubicacion, area_lat, area_lon, area_radio, area_bbox)
+     fecha_cita, sitio, sitio_lat, sitio_lon, sitio_web, ubicacion, area_lat, area_lon, area_radio, area_bbox)
   values
     (p_invitacion_id, p_categoria, p_nombre, p_mote, public._enc(p_contacto), 'sí', p_plan, p_tipo, p_franja, p_antojo,
-     p_fecha_cita, p_sitio, p_sitio_lat, p_sitio_lon, p_ubicacion, p_area_lat, p_area_lon, p_area_radio, p_area_bbox);
+     p_fecha_cita, p_sitio, p_sitio_lat, p_sitio_lon, p_sitio_web, p_ubicacion, p_area_lat, p_area_lon, p_area_radio, p_area_bbox);
 end;
 $$;
 
@@ -283,7 +285,7 @@ $$;
 grant execute on function public.login_admin(text, text)                          to anon, authenticated;
 grant execute on function public.logout_admin(text)                               to anon, authenticated;
 grant execute on function public.obtener_invitacion(text)                         to anon, authenticated;
-grant execute on function public.registrar_cita(uuid, text, text, text, text, text, text, text, text, timestamptz, text, double precision, double precision, text, double precision, double precision, integer, text) to anon, authenticated;
+grant execute on function public.registrar_cita(uuid, text, text, text, text, text, text, text, text, timestamptz, text, double precision, double precision, text, text, double precision, double precision, integer, text) to anon, authenticated;
 grant execute on function public.admin_citas(text)                                to anon, authenticated;
 grant execute on function public.admin_actualizar_cita(text, uuid, smallint, text, text) to anon, authenticated;
 grant execute on function public.admin_borrar_cita(text, uuid)                    to anon, authenticated;

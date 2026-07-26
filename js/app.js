@@ -519,13 +519,20 @@ async function buscarSitios() {
   }
 }
 
+// Web o catálogo del sitio, si OSM la trae (varios nombres de etiqueta posibles)
+function extraerWeb(tags) {
+  if (!tags) return null;
+  const claves = ['website', 'contact:website', 'website:menu', 'menu', 'url'];
+  for (const k of claves) { if (tags[k]) return tags[k]; }
+  return null;
+}
 function normalizar(elements, centro) {
   const out = [], vistos = new Set();
   for (const el of elements) {
     const lat = el.lat ?? el.center?.lat, lon = el.lon ?? el.center?.lon, nombre = el.tags?.name;
     if (lat == null || lon == null || !nombre) continue;
     const k = nombre.toLowerCase(); if (vistos.has(k)) continue; vistos.add(k);
-    out.push({ nombre, lat, lon, tags: el.tags, dist: centro ? haversine(centro.lat, centro.lon, lat, lon) : 0 });
+    out.push({ nombre, lat, lon, tags: el.tags, web: extraerWeb(el.tags), dist: centro ? haversine(centro.lat, centro.lon, lat, lon) : 0 });
   }
   return out;
 }
@@ -605,6 +612,7 @@ async function cerrarCita(place) {
     p_sitio: place ? place.nombre : null,
     p_sitio_lat: place ? place.lat : null,
     p_sitio_lon: place ? place.lon : null,
+    p_sitio_web: place ? place.web : null,
     p_ubicacion: cita.ubicacionLabel || '',
     p_area_lat: cita.area && cita.area.type === 'circle' ? cita.area.lat : null,
     p_area_lon: cita.area && cita.area.type === 'circle' ? cita.area.lon : null,

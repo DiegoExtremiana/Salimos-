@@ -36,6 +36,8 @@ function pintarIconos(raiz = document) {
   });
 }
 function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+function escAttr(s) { return esc(s).replace(/"/g, '&quot;'); }   // esc() no escapa comillas, hace falta para meterlo en href="..."
+function normalizarUrl(u) { return /^https?:\/\//i.test(u) ? u : `https://${u}`; }
 function fechaHora(iso) {
   if (!iso) return '';
   const d = new Date(iso);
@@ -295,6 +297,7 @@ function renderCitas() {
 
 function editorHTML(r) {
   const sitioLink = (r.sitio_lat && r.sitio_lon) ? enlaceMapa(r.sitio_lat, r.sitio_lon) : '';
+  const webLink = r.sitio_web ? `<a href="${escAttr(normalizarUrl(r.sitio_web))}" target="_blank" rel="noopener">ver web</a>` : '';
 
   // Zona: preferimos el nombre de sitio buscado (p.ej. "Madrid, España") a
   // las coordenadas en crudo del área dibujada, que no dicen nada de un vistazo.
@@ -319,7 +322,7 @@ function editorHTML(r) {
       <div><div class="lbl">Cuándo (cita)</div><div class="val">${r.fecha_cita ? fechaHora(r.fecha_cita) : '—'}</div></div>
       <div><div class="lbl">Salimos</div><div class="val">${esc(r.salimos) || '—'}</div></div>
       <div><div class="lbl">Plan</div><div class="val">${esc(r.plan) || '—'} · ${esc(r.antojo) || '—'}</div></div>
-      <div><div class="lbl">Sitio</div><div class="val">${esc(r.sitio) || '—'} ${sitioLink ? '&nbsp; ' + sitioLink : ''}</div></div>
+      <div><div class="lbl">Sitio</div><div class="val">${esc(r.sitio) || '—'} ${sitioLink ? '&nbsp; ' + sitioLink : ''} ${webLink ? '&nbsp; ' + webLink : ''}</div></div>
       <div class="full"><div class="lbl">Zona</div><div class="val">${zonaTexto} ${zonaLink ? '&nbsp; ' + zonaLink : ''}</div></div>
       <div class="full">
         <div class="lbl">¿Qué tal fue la cita?</div>
