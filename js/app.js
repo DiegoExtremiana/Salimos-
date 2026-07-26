@@ -129,6 +129,7 @@ let noHits = 0, roaming = false;
 function setupHuida() {
   const btnNo = document.getElementById('btn-no');
   const btnSi = document.getElementById('btn-si');
+  const casaBtnNo = btnNo.parentElement;   // dónde vive de normal, dentro de #screen-salimos
   const UMBRAL = 120;
   const PAD = 14;
 
@@ -209,7 +210,26 @@ function setupHuida() {
   btnNo.addEventListener('touchstart', (e) => { e.preventDefault(); const t = e.touches[0]; saltar(t ? t.clientX : innerWidth / 2, t ? t.clientY : innerHeight / 2); }, { passive: false });
   btnNo.addEventListener('pointerdown', (e) => { e.preventDefault(); saltar(e.clientX, e.clientY); });
   btnNo.addEventListener('click', (e) => { e.preventDefault(); saltar(e.clientX, e.clientY); });
-  btnSi.addEventListener('click', () => { lanzarCorazones(); setTimeout(() => goTo('screen-vamos'), 450); });
+  btnSi.addEventListener('click', () => {
+    lanzarCorazones();
+    // Aquí se acaba la huida: el botón vive en <body> mientras huye, así que
+    // si no lo devolvemos a su sitio se quedaría visible en las pantallas
+    // siguientes (no desaparece solo con cambiar de pantalla).
+    if (roaming) {
+      casaBtnNo.appendChild(btnNo);
+      btnNo.style.position = '';
+      btnNo.style.left = '';
+      btnNo.style.top = '';
+      btnNo.style.margin = '';
+      btnNo.style.transform = '';
+      const span = btnNo.querySelector('span'); if (span) span.style.display = '';
+      btnNo.childNodes.forEach((n) => { if (n.nodeType === 3) n.textContent = ''; });
+      btnNo.appendChild(document.createTextNode('No'));
+      noHits = 0;
+      roaming = false;
+    }
+    setTimeout(() => goTo('screen-vamos'), 450);
+  });
 
   // Rotar el móvil, abrir el teclado, redimensionar la ventana: reencaja sin dejarlo fuera
   function reencajar() {

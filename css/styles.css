@@ -143,7 +143,9 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   mask-composite: exclude;
   pointer-events: none;
 }
-.card-wide { width: min(760px, 100%); text-align: left; }
+/* La cita (mapa + lista + fecha/hora) puede no caber entera: que se
+   desplace ella sola, nunca la página ni la pantalla que la envuelve. */
+.card-wide { width: min(760px, 100%); text-align: left; overflow-y: auto; }
 .card-hero { overflow: visible; }
 
 /* Sticker girado */
@@ -317,24 +319,10 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 .inline-ico { color: var(--gold); }
 
 /* ---------- Resultado / mapa ---------- */
-/* #map-stage y #results-wrap son los únicos tramos elásticos de la tarjeta:
-   si todo lo demás ya ocupa su sitio, ellos ceden alto antes que forzar scroll. */
-.card > #map-stage, .card > #results-wrap {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-#map-stage > * { flex-shrink: 0; }
-#results-wrap { overflow: hidden; }
-
 .results-wrap { margin-top: clamp(6px, 1.6vh, 14px); }
 .results-help { text-align: center; color: var(--muted); font-weight: 700; margin: clamp(6px, 1.6vh, 12px) 0 4px; }
-.places { flex: 1 1 auto; min-height: 0; overflow: hidden; }
 .map {
-  height: clamp(110px, 28vh, 300px);
-  flex: 1 1 auto;
-  min-height: 90px;
+  height: clamp(180px, 32vh, 320px);
   width: 100%;
   border-radius: 18px;
   overflow: hidden;
