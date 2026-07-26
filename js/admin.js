@@ -161,18 +161,12 @@ function renderCitas() {
     const tr = document.createElement('tr');
     tr.className = 'row' + (r.id === openId ? ' open' : '');
     tr.innerHTML = COLS.map((c) => `<td>${c.fmt ? c.fmt(r[c.k]) : esc(r[c.k]) || '—'}</td>`).join('');
-    tr.addEventListener('click', () => { openId = openId === r.id ? null : r.id; renderCitas(); });
+    tr.addEventListener('click', () => abrirModalCita(r));
     tbody.appendChild(tr);
-    if (r.id === openId) tbody.appendChild(filaDetalle(r));
   });
 }
 
-function filaDetalle(r) {
-  const tr = document.createElement('tr');
-  tr.className = 'detail';
-  const td = document.createElement('td');
-  td.colSpan = COLS.length;
-
+function editorHTML(r) {
   const sitioLink = (r.sitio_lat && r.sitio_lon)
     ? `<a href="https://www.openstreetmap.org/?mlat=${r.sitio_lat}&mlon=${r.sitio_lon}#map=18/${r.sitio_lat}/${r.sitio_lon}" target="_blank" rel="noopener">ver en mapa</a>`
     : '—';
@@ -184,7 +178,7 @@ function filaDetalle(r) {
     .concat(Array.from({ length: 11 }, (_, i) => `<option value="${i}" ${r.nota === i ? 'selected' : ''}>${i}/10</option>`))
     .join('');
 
-  td.innerHTML = `
+  return `
     <div class="editor">
       <div><div class="lbl">Categoría</div><div class="val">${fmtCategoria(r.categoria)}</div></div>
       <div><div class="lbl">Contacto</div><div class="val">${esc(r.contacto) || '<span style="color:var(--muted)">— (solo landing)</span>'}</div></div>
@@ -207,20 +201,32 @@ function filaDetalle(r) {
         <span class="save-msg" id="ed-msg"></span>
       </div>
     </div>`;
-  tr.appendChild(td);
-
-  pintarIconos(td);
-  td.querySelector('#ed-save').addEventListener('click', (e) => { e.stopPropagation(); guardarCita(r.id, td); });
-  td.querySelector('#ed-del').addEventListener('click', (e) => { e.stopPropagation(); borrarCita(r.id); });
-  td.querySelector('.editor').addEventListener('click', (e) => e.stopPropagation());
-  return tr;
 }
 
-async function guardarCita(id, td) {
-  const msg = td.querySelector('#ed-msg');
-  const notaVal = td.querySelector('#ed-nota').value;
+/* ---------- modal detalle de cita ---------- */
+function abrirModalCita(r) {
+  openId = r.id;
+  renderCitas();
+  const body = document.getElementById('modal-cita-body');
+  body.innerHTML = editorHTML(r);
+  pintarIconos(body);
+  document.getElementById('ed-save').addEventListener('click', () => guardarCita(r.id));
+  document.getElementById('ed-del').addEventListener('click', () => borrarCita(r.id));
+  document.getElementById('modal-cita').hidden = false;
+  bloquearScroll();
+}
+function cerrarModalCita() {
+  document.getElementById('modal-cita').hidden = true;
+  openId = null;
+  desbloquearScroll();
+  renderCitas();
+}
+
+async function guardarCita(id) {
+  const msg = document.getElementById('ed-msg');
+  const notaVal = document.getElementById('ed-nota').value;
   const p_nota = notaVal === '' ? null : parseInt(notaVal, 10);
-  const p_notas = td.querySelector('#ed-notas').value || null;
+  const p_notas = document.getElementById('ed-notas').value || null;
   const { error } = await window.sb.rpc('admin_actualizar_cita', { p_token: token, p_id: id, p_nota, p_notas });
   if (error) {
     if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
@@ -229,7 +235,6 @@ async function guardarCita(id, td) {
   const row = rows.find((r) => r.id === id);
   if (row) { row.nota = p_nota; row.notas_admin = p_notas; }
   msg.style.color = ''; msg.textContent = 'Guardado ✓';
-  setTimeout(() => renderCitas(), 500);
 }
 
 async function borrarCita(id) {
@@ -240,8 +245,7 @@ async function borrarCita(id) {
     alert('No se pudo borrar: ' + error.message); return;
   }
   rows = rows.filter((r) => r.id !== id);
-  openId = null;
-  renderCitas();
+  cerrarModalCita();
 }
 
 /* ---------- INVITACIONES ---------- */
@@ -306,12 +310,19 @@ async function copiar(text, btn) {
 }
 
 /* ---------- modal ---------- */
+function bloquearScroll() { document.documentElement.classList.add('modal-open'); document.body.classList.add('modal-open'); }
+function desbloquearScroll() {
+  // Solo desbloquea si no queda ningún otro modal abierto
+  if (!document.getElementById('modal').hidden || !document.getElementById('modal-cita').hidden) return;
+  document.documentElement.classList.remove('modal-open'); document.body.classList.remove('modal-open');
+}
 function abrirModal() {
   document.getElementById('invite-form').reset();
   document.getElementById('invite-result').hidden = true;
   document.getElementById('modal').hidden = false;
+  bloquearScroll();
 }
-function cerrarModal() { document.getElementById('modal').hidden = true; }
+function cerrarModal() { document.getElementById('modal').hidden = true; desbloquearScroll(); }
 
 /* ---------- arranque ---------- */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -330,6 +341,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('modal').addEventListener('click', (e) => { if (e.target.id === 'modal') cerrarModal(); });
   document.getElementById('invite-form').addEventListener('submit', crearInvitacion);
   document.getElementById('copy-url').addEventListener('click', () => copiar(document.getElementById('invite-url').value, document.getElementById('copy-url')));
+
+  document.getElementById('modal-cita-close').addEventListener('click', cerrarModalCita);
+  document.getElementById('modal-cita').addEventListener('click', (e) => { if (e.target.id === 'modal-cita') cerrarModalCita(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!document.getElementById('modal-cita').hidden) cerrarModalCita();
+    else if (!document.getElementById('modal').hidden) cerrarModal();
+  });
 
   // ¿Token guardado y válido?
   if (token && window.sb) {
