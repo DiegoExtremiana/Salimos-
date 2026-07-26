@@ -434,26 +434,36 @@ const OVERPASS = [
 ];
 // Lanza la consulta a todos los mirrors a la vez y devuelve el PRIMERO que
 // responde bien (rápido + fiable). Aborta los demás y corta si nadie contesta.
-async function overpass(query, timeoutMs = 14000) {
-  const controllers = OVERPASS.map(() => new AbortController());
-  const timer = setTimeout(() => controllers.forEach((c) => c.abort()), timeoutMs);
-  const intentos = OVERPASS.map((url, i) =>
-    fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'data=' + encodeURIComponent(query),
-      signal: controllers[i].signal,
-    }).then((res) => {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    })
-  );
-  try {
-    return await Promise.any(intentos);
-  } finally {
-    clearTimeout(timer);
-    controllers.forEach((c) => c.abort());   // cancela los que sigan en vuelo
+// Los mirrors públicos (gratis, sin garantías) a veces dan 504 sueltos bajo
+// carga: un intento con reintento automático hace que funcione a la primera
+// casi siempre, sin que el usuario tenga que pulsar "buscar" otra vez.
+async function overpass(query, { timeoutMs = 13000, intentos: maxIntentos = 2, onReintento } = {}) {
+  let ultimoError;
+  for (let intento = 1; intento <= maxIntentos; intento++) {
+    const controllers = OVERPASS.map(() => new AbortController());
+    const timer = setTimeout(() => controllers.forEach((c) => c.abort()), timeoutMs);
+    const peticiones = OVERPASS.map((url, i) =>
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'data=' + encodeURIComponent(query),
+        signal: controllers[i].signal,
+      }).then((res) => {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+    );
+    try {
+      return await Promise.any(peticiones);
+    } catch (e) {
+      ultimoError = e;
+      controllers.forEach((c) => c.abort());   // cancela los que sigan en vuelo
+      if (intento < maxIntentos) { onReintento?.(); await new Promise((r) => setTimeout(r, 900)); }
+    } finally {
+      clearTimeout(timer);
+    }
   }
+  throw ultimoError;
 }
 
 let buscando = false;
@@ -489,7 +499,9 @@ async function buscarSitios() {
   cita.center = centro;
 
   try {
-    const data = await overpass(query);
+    const data = await overpass(query, {
+      onReintento: () => { lista.innerHTML = `<li class="state-msg loading-msg">Casi... reintentando la búsqueda…</li>`; },
+    });
     const sitios = normalizar(data.elements || [], centro);
     if (!sitios.length) {
       lista.innerHTML = `<li class="state-msg">No encuentro ${escapar(cita.cuisine.label.toLowerCase())} en esa zona. Amplía el área o mueve el mapa.</li>`;

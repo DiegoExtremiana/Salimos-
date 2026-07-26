@@ -124,6 +124,67 @@ function fotoActual(ns) {
   return preview.hidden ? null : preview.src;
 }
 
+/* ---------- evaluación de la cita: 5 estrellas (medias incluidas) sobre
+   la nota 0-10 que ya guarda la BD, en vez de un <select> plano ---------- */
+const STAR_PATH = 'M12 3l2.5 5.6L20.5 9l-4.3 4.2 1 6-5.2-2.8L6.8 19.2l1-6L3.5 9l6-.4z';
+function starSvg(relleno) {
+  return `<svg viewBox="0 0 24 24" fill="${relleno ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.7"><path d="${STAR_PATH}"/></svg>`;
+}
+function fraccionEstrella(indice, nota) {
+  if (nota == null) return 0;
+  const val = nota - indice * 2;
+  return val <= 0 ? 0 : val >= 2 ? 1 : 0.5;
+}
+function ratingHTML(nota) {
+  const estrellas = [0, 1, 2, 3, 4].map((i) => `
+    <button type="button" class="rating-star" data-index="${i}" title="${(i + 1) * 2}/10">
+      <span class="rating-star-bg">${starSvg(false)}</span>
+      <span class="rating-star-fg" style="clip-path: inset(0 ${Math.round((1 - fraccionEstrella(i, nota)) * 100)}% 0 0);">${starSvg(true)}</span>
+    </button>`).join('');
+  return `
+    <div class="rating" id="ed-rating">
+      <div class="rating-stars">${estrellas}</div>
+      <span class="rating-value" id="ed-rating-value">${nota != null ? nota + '/10' : 'sin evaluar'}</span>
+      <button type="button" class="rating-clear" id="ed-rating-clear" ${nota == null ? 'hidden' : ''}>Quitar</button>
+      <input type="hidden" id="ed-nota" value="${nota ?? ''}" />
+    </div>`;
+}
+function wireRating() {
+  const cont = document.getElementById('ed-rating');
+  const hidden = document.getElementById('ed-nota');
+  const valueLbl = document.getElementById('ed-rating-value');
+  const clearBtn = document.getElementById('ed-rating-clear');
+
+  function pintar(nota) {
+    cont.querySelectorAll('.rating-star').forEach((btn, i) => {
+      btn.querySelector('.rating-star-fg').style.clipPath = `inset(0 ${Math.round((1 - fraccionEstrella(i, nota)) * 100)}% 0 0)`;
+    });
+    valueLbl.textContent = nota != null ? `${nota}/10` : 'sin evaluar';
+    clearBtn.hidden = nota == null;
+    hidden.value = nota ?? '';
+  }
+  cont.querySelectorAll('.rating-star').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const i = +btn.dataset.index;
+      const r = btn.getBoundingClientRect();
+      const mitadIzquierda = (e.clientX - r.left) < r.width / 2;
+      pintar(i * 2 + (mitadIzquierda ? 1 : 2));
+    });
+  });
+  clearBtn.addEventListener('click', () => pintar(null));
+}
+
+/* ---------- zona / sitio: enlace a mapa y centro de un bbox dibujado ---------- */
+function enlaceMapa(lat, lon, zoom = 16) {
+  return `<a href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=${zoom}/${lat}/${lon}" target="_blank" rel="noopener">ver en mapa</a>`;
+}
+function centroBbox(bbox) {
+  const partes = String(bbox).split(',').map(Number);
+  if (partes.length !== 4 || partes.some(Number.isNaN)) return null;
+  const [sur, oeste, norte, este] = partes;
+  return { lat: (sur + norte) / 2, lon: (oeste + este) / 2 };
+}
+
 /* ---------- login / sesión ---------- */
 function showLogin() {
   document.getElementById('login').hidden = false;
@@ -233,16 +294,23 @@ function renderCitas() {
 }
 
 function editorHTML(r) {
-  const sitioLink = (r.sitio_lat && r.sitio_lon)
-    ? `<a href="https://www.openstreetmap.org/?mlat=${r.sitio_lat}&mlon=${r.sitio_lon}#map=18/${r.sitio_lat}/${r.sitio_lon}" target="_blank" rel="noopener">ver en mapa</a>`
-    : '—';
-  let area = '—';
-  if (r.area_radio) area = `Círculo · radio ${r.area_radio} m`;
-  else if (r.area_bbox) area = `Rectángulo · ${r.area_bbox}`;
+  const sitioLink = (r.sitio_lat && r.sitio_lon) ? enlaceMapa(r.sitio_lat, r.sitio_lon) : '';
 
-  const notaOpts = ['<option value="">— sin nota —</option>']
-    .concat(Array.from({ length: 11 }, (_, i) => `<option value="${i}" ${r.nota === i ? 'selected' : ''}>${i}/10</option>`))
-    .join('');
+  // Zona: preferimos el nombre de sitio buscado (p.ej. "Madrid, España") a
+  // las coordenadas en crudo del área dibujada, que no dicen nada de un vistazo.
+  let zonaTexto = r.ubicacion ? esc(r.ubicacion) : null;
+  let zonaLink = '';
+  if (r.area_radio) {
+    const detalle = `radio de ${r.area_radio} m`;
+    zonaTexto = zonaTexto ? `${zonaTexto} · ${detalle}` : detalle;
+    if (r.area_lat && r.area_lon) zonaLink = enlaceMapa(r.area_lat, r.area_lon, 14);
+  } else if (r.area_bbox) {
+    const detalle = 'zona dibujada a mano';
+    zonaTexto = zonaTexto ? `${zonaTexto} · ${detalle}` : detalle;
+    const c = centroBbox(r.area_bbox);
+    if (c) zonaLink = enlaceMapa(c.lat, c.lon, 14);
+  }
+  if (!zonaTexto) zonaTexto = '— (sin zona ni área marcada)';
 
   return `
     <div class="editor">
@@ -251,11 +319,11 @@ function editorHTML(r) {
       <div><div class="lbl">Cuándo (cita)</div><div class="val">${r.fecha_cita ? fechaHora(r.fecha_cita) : '—'}</div></div>
       <div><div class="lbl">Salimos</div><div class="val">${esc(r.salimos) || '—'}</div></div>
       <div><div class="lbl">Plan</div><div class="val">${esc(r.plan) || '—'} · ${esc(r.antojo) || '—'}</div></div>
-      <div><div class="lbl">Sitio</div><div class="val">${esc(r.sitio) || '—'} &nbsp; ${sitioLink}</div></div>
-      <div><div class="lbl">Área marcada</div><div class="val">${esc(area)}</div></div>
-      <div>
-        <div class="lbl">Nota de la cita</div>
-        <select id="ed-nota">${notaOpts}</select>
+      <div><div class="lbl">Sitio</div><div class="val">${esc(r.sitio) || '—'} ${sitioLink ? '&nbsp; ' + sitioLink : ''}</div></div>
+      <div class="full"><div class="lbl">Zona</div><div class="val">${zonaTexto} ${zonaLink ? '&nbsp; ' + zonaLink : ''}</div></div>
+      <div class="full">
+        <div class="lbl">¿Qué tal fue la cita?</div>
+        ${ratingHTML(r.nota)}
       </div>
       <div class="full">
         <div class="lbl">Notas del admin</div>
@@ -281,6 +349,7 @@ function abrirModalCita(r) {
   body.innerHTML = editorHTML(r);
   pintarIconos(body);
   wireFotoPicker('cita');
+  wireRating();
   document.getElementById('ed-save').addEventListener('click', () => guardarCita(r.id));
   document.getElementById('ed-del').addEventListener('click', () => borrarCita(r.id));
   document.getElementById('modal-cita').hidden = false;

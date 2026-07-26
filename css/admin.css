@@ -173,6 +173,18 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 .editor a:hover { text-decoration: underline; }
 .editor-actions { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; }
 
+/* ---------- Evaluación de la cita (5 estrellas, medias incluidas) ---------- */
+.rating { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rating-stars { display: flex; gap: 2px; }
+.rating-star { position: relative; width: 32px; height: 32px; padding: 2px; background: none; border: none; cursor: pointer; }
+.rating-star-bg, .rating-star-fg { position: absolute; inset: 2px; pointer-events: none; }
+.rating-star-bg svg, .rating-star-fg svg { width: 100%; height: 100%; display: block; }
+.rating-star-bg { color: var(--line-2); }
+.rating-star-fg { color: var(--gold); }
+.rating-value { font-weight: 800; color: var(--text); font-size: 0.92rem; min-width: 5.5em; }
+.rating-clear { background: none; border: none; color: var(--muted); font-size: 0.82rem; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.rating-clear:hover { color: var(--text); }
+
 /* ---------- Selector de foto (cita / invitación) ---------- */
 .foto-box { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .foto-preview { width: 110px; height: 110px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line-2); background: rgba(0, 0, 0, 0.3); }
