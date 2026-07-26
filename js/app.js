@@ -588,20 +588,23 @@ async function cerrarCita(place) {
   document.getElementById('map-stage').hidden = true;
   document.getElementById('results-wrap').hidden = true;
 
-  const done = document.getElementById('done');
-  done.hidden = false;
-  document.getElementById('done-title').textContent = '¡Cita cerrada!';
-  const cuando = cita.slot ? ` (${cita.slot.name.toLowerCase()}, ${cita.slot.start})` : '';
-  const sitioTxt = place ? ` en ${place.nombre}` : '';
-  document.getElementById('done-text').textContent = `${m.label} de ${c.label.toLowerCase()}${sitioTxt}${cuando}. Nos vemos ✨`;
-  pintarIconos(done);
-  lanzarCorazones();
-
-  // fecha y hora de la cita (elegidas en el paso del mapa)
+  // fecha y hora de la cita (elegidas en el paso del mapa): si la invitada
+  // puso una hora concreta, manda SIEMPRE por delante de la franja por defecto
+  // del plan (antes se ignoraba y se guardaba/mostraba siempre la de serie).
   const fechaVal = document.getElementById('cita-fecha').value;
   const horaVal = document.getElementById('cita-hora').value;
   let fechaCita = null;
   if (fechaVal) { const d = new Date(`${fechaVal}T${horaVal || '00:00'}`); if (!isNaN(d)) fechaCita = d.toISOString(); }
+  const horaFinal = horaVal || (cita.slot ? cita.slot.start : '');
+
+  const done = document.getElementById('done');
+  done.hidden = false;
+  document.getElementById('done-title').textContent = '¡Cita cerrada!';
+  const cuando = cita.slot ? ` (${cita.slot.name.toLowerCase()}, ${horaFinal})` : (horaFinal ? ` (a las ${horaFinal})` : '');
+  const sitioTxt = place ? ` en ${place.nombre}` : '';
+  document.getElementById('done-text').textContent = `${m.label} de ${c.label.toLowerCase()}${sitioTxt}${cuando}. Nos vemos ✨`;
+  pintarIconos(done);
+  lanzarCorazones();
 
   const params = {
     p_invitacion_id: cita.invitacionId,
@@ -611,7 +614,7 @@ async function cerrarCita(place) {
     p_contacto: cita.contacto || null,
     p_plan: m.label,
     p_tipo: m.kind,
-    p_franja: cita.slot ? `${cita.slot.start}-${cita.slot.end}` : '',
+    p_franja: horaVal ? horaVal : (cita.slot ? `${cita.slot.start}-${cita.slot.end}` : ''),
     p_antojo: c.label,
     p_fecha_cita: fechaCita,
     p_sitio: place ? place.nombre : null,
