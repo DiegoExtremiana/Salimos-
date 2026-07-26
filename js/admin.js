@@ -213,12 +213,10 @@ function abrirModalCita(r) {
   document.getElementById('ed-save').addEventListener('click', () => guardarCita(r.id));
   document.getElementById('ed-del').addEventListener('click', () => borrarCita(r.id));
   document.getElementById('modal-cita').hidden = false;
-  bloquearScroll();
 }
 function cerrarModalCita() {
   document.getElementById('modal-cita').hidden = true;
   openId = null;
-  desbloquearScroll();
   renderCitas();
 }
 
@@ -310,19 +308,12 @@ async function copiar(text, btn) {
 }
 
 /* ---------- modal ---------- */
-function bloquearScroll() { document.documentElement.classList.add('modal-open'); document.body.classList.add('modal-open'); }
-function desbloquearScroll() {
-  // Solo desbloquea si no queda ningún otro modal abierto
-  if (!document.getElementById('modal').hidden || !document.getElementById('modal-cita').hidden) return;
-  document.documentElement.classList.remove('modal-open'); document.body.classList.remove('modal-open');
-}
 function abrirModal() {
   document.getElementById('invite-form').reset();
   document.getElementById('invite-result').hidden = true;
   document.getElementById('modal').hidden = false;
-  bloquearScroll();
 }
-function cerrarModal() { document.getElementById('modal').hidden = true; desbloquearScroll(); }
+function cerrarModal() { document.getElementById('modal').hidden = true; }
 
 /* ---------- arranque ---------- */
 document.addEventListener('DOMContentLoaded', async () => {
