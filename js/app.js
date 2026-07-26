@@ -130,37 +130,75 @@ function setupHuida() {
   const btnNo = document.getElementById('btn-no');
   const btnSi = document.getElementById('btn-si');
   const UMBRAL = 120;
+  const PAD = 14;
+
+  // Tamaño de pantalla real (visualViewport evita sorpresas con teclado/barra del navegador)
+  function tamPantalla() {
+    const vv = window.visualViewport;
+    return vv ? { w: vv.width, h: vv.height } : { w: window.innerWidth, h: window.innerHeight };
+  }
+
+  // Límites según la huella YA GIRADA del botón: un botón rotado ocupa más
+  // que su ancho/alto sin girar, así que el límite tiene que contar con eso
+  // o la esquina se saldría de la pantalla (y con ella, el scroll).
+  function limites(w, h, deg) {
+    const rad = Math.abs(deg) * Math.PI / 180;
+    const bw = w * Math.cos(rad) + h * Math.sin(rad);
+    const bh = w * Math.sin(rad) + h * Math.cos(rad);
+    const exX = (bw - w) / 2, exY = (bh - h) / 2;
+    const { w: vw, h: vh } = tamPantalla();
+    const minX = PAD + exX, minY = PAD + exY;
+    return {
+      minX, minY,
+      maxX: Math.max(minX, vw - w - PAD - exX),
+      maxY: Math.max(minY, vh - h - PAD - exY),
+    };
+  }
 
   function fijar() {
     if (roaming) return;
     const r = btnNo.getBoundingClientRect();
+    // .card usa backdrop-filter y .screen usa transform: ambos crean un
+    // "contenedor" propio para position:fixed, así que top/left dejarían de
+    // ser relativos a la pantalla real. Sacamos el botón al body para que
+    // "fixed" sea de verdad relativo al viewport.
+    document.body.appendChild(btnNo);
     btnNo.style.position = 'fixed';
     btnNo.style.margin = '0';
     btnNo.style.left = r.left + 'px';
     btnNo.style.top = r.top + 'px';
     roaming = true;
   }
+
+  function anguloActual() {
+    const m = /rotate\(([-\d.]+)deg\)/.exec(btnNo.style.transform);
+    return m ? +m[1] : 0;
+  }
+
   function saltar(px, py) {
     fijar();
-    const w = btnNo.offsetWidth, h = btnNo.offsetHeight, pad = 14;
-    const maxX = window.innerWidth - w - pad, maxY = window.innerHeight - h - pad;
-    const cx = btnNo.getBoundingClientRect().left + w / 2;
-    const cy = btnNo.getBoundingClientRect().top + h / 2;
-    let dx = cx - px, dy = cy - py, dist = Math.hypot(dx, dy) || 1;
-    let nx = cx + (dx / dist) * 190 - w / 2, ny = cy + (dy / dist) * 190 - h / 2;
-    nx = Math.max(pad, Math.min(maxX, nx));
-    ny = Math.max(pad, Math.min(maxY, ny));
-    if (Math.hypot(nx + w / 2 - px, ny + h / 2 - py) < UMBRAL) {
-      nx = pad + Math.random() * (maxX - pad);
-      ny = pad + Math.random() * (maxY - pad);
-    }
-    btnNo.style.left = nx + 'px';
-    btnNo.style.top = ny + 'px';
     noHits++;
-    btnNo.style.transform = `rotate(${(Math.random() * 16 - 8).toFixed(1)}deg)`;
     const span = btnNo.querySelector('span'); if (span) span.style.display = 'none';
     btnNo.childNodes.forEach((n) => { if (n.nodeType === 3) n.textContent = ''; });
     btnNo.appendChild(document.createTextNode(LABELS_NO[Math.min(noHits, LABELS_NO.length - 1)]));
+
+    const deg = +(Math.random() * 16 - 8).toFixed(1);
+    const w = btnNo.offsetWidth, h = btnNo.offsetHeight;
+    const { minX, minY, maxX, maxY } = limites(w, h, deg);
+
+    const r = btnNo.getBoundingClientRect();
+    const cx = r.left + w / 2, cy = r.top + h / 2;
+    let dx = cx - px, dy = cy - py, dist = Math.hypot(dx, dy) || 1;
+    let nx = cx + (dx / dist) * 190 - w / 2, ny = cy + (dy / dist) * 190 - h / 2;
+    nx = Math.max(minX, Math.min(maxX, nx));
+    ny = Math.max(minY, Math.min(maxY, ny));
+    if (Math.hypot(nx + w / 2 - px, ny + h / 2 - py) < UMBRAL) {
+      nx = minX + Math.random() * (maxX - minX);
+      ny = minY + Math.random() * (maxY - minY);
+    }
+    btnNo.style.left = nx + 'px';
+    btnNo.style.top = ny + 'px';
+    btnNo.style.transform = `rotate(${deg}deg)`;
   }
   document.addEventListener('pointermove', (e) => {
     if (!document.getElementById('screen-salimos').classList.contains('is-active')) return;
@@ -172,6 +210,17 @@ function setupHuida() {
   btnNo.addEventListener('pointerdown', (e) => { e.preventDefault(); saltar(e.clientX, e.clientY); });
   btnNo.addEventListener('click', (e) => { e.preventDefault(); saltar(e.clientX, e.clientY); });
   btnSi.addEventListener('click', () => { lanzarCorazones(); setTimeout(() => goTo('screen-vamos'), 450); });
+
+  // Rotar el móvil, abrir el teclado, redimensionar la ventana: reencaja sin dejarlo fuera
+  function reencajar() {
+    if (!roaming) return;
+    const r = btnNo.getBoundingClientRect();
+    const { minX, minY, maxX, maxY } = limites(r.width, r.height, anguloActual());
+    btnNo.style.left = Math.max(minX, Math.min(maxX, r.left)) + 'px';
+    btnNo.style.top = Math.max(minY, Math.min(maxY, r.top)) + 'px';
+  }
+  window.addEventListener('resize', reencajar);
+  window.visualViewport?.addEventListener('resize', reencajar);
 }
 
 function lanzarCorazones() {

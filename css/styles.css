@@ -35,6 +35,7 @@
   --radius: 20px;
   --font-title: "Fraunces", Georgia, "Times New Roman", serif;
   --font-body: "Nunito", system-ui, -apple-system, sans-serif;
+  --pad-screen: clamp(10px, min(4vw, 4vh), 48px);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,7 +62,7 @@ body {
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: clamp(16px, 4vw, 48px);
+  padding: clamp(10px, min(4vw, 4vh), 48px);
 }
 
 /* ---------- Splash (arranque, evita parpadeo) ---------- */
@@ -96,7 +97,7 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   align-items: safe center;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: clamp(16px, 4vw, 48px);
+  padding: var(--pad-screen);
   opacity: 0;
   transform: translateY(22px) scale(0.985);
   transition: opacity 0.6s cubic-bezier(.2,.7,.2,1), transform 0.6s cubic-bezier(.2,.7,.2,1);
@@ -110,15 +111,25 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   width: min(560px, 100%);
   max-width: 100%;
   min-width: 0;
+  max-height: calc(100dvh - 2 * var(--pad-screen));
+  display: flex;
+  flex-direction: column;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  padding: clamp(34px, 6vw, 64px);
+  padding: clamp(16px, min(6vw, 4.2vh), 56px);
   text-align: center;
   -webkit-backdrop-filter: blur(14px) saturate(1.05);
   backdrop-filter: blur(14px) saturate(1.05);
+  overflow: hidden;
 }
+/* Todo se mantiene a su tamaño natural salvo lo que marquemos flexible más abajo */
+.card > * { flex-shrink: 0; }
+/* Sin esto, el flex-column estiraría estos elementos (chip, enlace) a todo el ancho */
+.card > .badge, .card > .link-back { align-self: center; }
+/* .card-wide es texto a la izquierda, así que el chip/enlace van a la izquierda también */
+.card-wide > .badge, .card-wide > .link-back { align-self: flex-start; }
 /* filo superior, brillo de vitrina */
 .card::before {
   content: "";
@@ -145,10 +156,10 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   text-transform: uppercase;
   color: var(--bg-0);
   background: linear-gradient(135deg, var(--gold), var(--gold-dk));
-  padding: 6px 16px;
+  padding: clamp(4px, 1vh, 6px) 16px;
   border-radius: 999px;
   box-shadow: var(--glow-gold);
-  margin-bottom: 20px;
+  margin-bottom: clamp(6px, 2.2vh, 16px);
   transform: rotate(-3deg);
 }
 .badge-tilt {
@@ -165,7 +176,7 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--gold-2);
-  margin-bottom: 14px;
+  margin-bottom: clamp(4px, 1.4vh, 10px);
 }
 
 .ask {
@@ -173,21 +184,21 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   font-weight: 500;
   font-optical-sizing: auto;
   line-height: 1;
-  font-size: clamp(2.6rem, 9vw, 4.6rem);
+  font-size: clamp(1.9rem, min(9vw, 7.2vh), 4.6rem);
   letter-spacing: -0.01em;
-  margin-bottom: 16px;
+  margin-bottom: clamp(6px, 1.6vh, 12px);
   color: var(--ivory);
   text-shadow: 0 2px 30px rgba(0, 0, 0, 0.5);
   overflow-wrap: break-word;   /* palabras largas parten antes de desbordar */
 }
-.ask-sm { font-size: clamp(2.1rem, 7vw, 3.2rem); }
+.ask-sm { font-size: clamp(1.6rem, min(7vw, 5.6vh), 3.2rem); }
 
 .sub {
   color: var(--muted);
-  font-size: clamp(1rem, 2.4vw, 1.08rem);
+  font-size: clamp(0.92rem, 2.4vw, 1.08rem);
   font-weight: 500;
-  line-height: 1.55;
-  margin-bottom: 34px;
+  line-height: 1.5;
+  margin-bottom: clamp(10px, min(4vw, 2.8vh), 26px);
 }
 
 /* ---------- Botones ---------- */
@@ -236,6 +247,8 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   border: 1px solid var(--line-2);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   z-index: 60;
+  min-width: 12ch;
+  justify-content: center;
   transition: left 0.32s cubic-bezier(.22,.61,.36,1),
               top 0.32s cubic-bezier(.22,.61,.36,1),
               transform 0.32s ease, box-shadow 0.25s ease;
@@ -243,7 +256,7 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 .btn-no .icon { color: var(--garnet-soft); }
 
 .hint {
-  margin-top: 24px;
+  margin-top: clamp(10px, 3vh, 24px);
   font-size: 0.85rem;
   color: var(--muted-2);
   font-style: italic;
@@ -253,22 +266,22 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 .options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
-  gap: 14px;
+  gap: clamp(6px, 1.6vh, 14px);
   margin-top: 6px;
 }
 .option {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 24px 14px;
+  gap: clamp(4px, 1vh, 10px);
+  padding: clamp(8px, 2.2vh, 22px) 14px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--line);
   color: var(--ivory-soft);
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: 1.02rem;
+  font-size: clamp(0.84rem, 1.8vh, 1.02rem);
   font-weight: 700;
   transition: transform 0.18s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -278,12 +291,12 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   border-color: var(--line-2);
   box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45), var(--glow-gold);
 }
-.option .icon { width: 40px; height: 40px; color: var(--gold-dk); stroke-width: 1.4; transition: color 0.2s ease; }
+.option .icon { width: clamp(20px, 4.4vh, 40px); height: clamp(20px, 4.4vh, 40px); color: var(--gold-dk); stroke-width: 1.4; transition: color 0.2s ease; }
 .option:hover .icon { color: var(--gold); }
 .option .tiny { font-size: 0.76rem; font-weight: 700; color: var(--muted-2); }
 
 .link-back {
-  margin-top: 28px;
+  margin-top: clamp(8px, 2.4vh, 20px);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -304,10 +317,24 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 .inline-ico { color: var(--gold); }
 
 /* ---------- Resultado / mapa ---------- */
-.results-wrap { margin-top: 18px; }
-.results-help { text-align: center; color: var(--muted); font-weight: 700; margin: 16px 0 4px; }
+/* #map-stage y #results-wrap son los únicos tramos elásticos de la tarjeta:
+   si todo lo demás ya ocupa su sitio, ellos ceden alto antes que forzar scroll. */
+.card > #map-stage, .card > #results-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+#map-stage > * { flex-shrink: 0; }
+#results-wrap { overflow: hidden; }
+
+.results-wrap { margin-top: clamp(6px, 1.6vh, 14px); }
+.results-help { text-align: center; color: var(--muted); font-weight: 700; margin: clamp(6px, 1.6vh, 12px) 0 4px; }
+.places { flex: 1 1 auto; min-height: 0; overflow: hidden; }
 .map {
-  height: clamp(240px, 45vh, 380px);
+  height: clamp(110px, 28vh, 300px);
+  flex: 1 1 auto;
+  min-height: 90px;
   width: 100%;
   border-radius: 18px;
   overflow: hidden;
@@ -381,7 +408,7 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 .done p { color: var(--muted); font-weight: 600; }
 
 .footer-note {
-  margin-top: 22px;
+  margin-top: clamp(6px, 1.8vh, 16px);
   text-align: center;
   font-size: 0.8rem;
   color: var(--muted-2);
@@ -396,48 +423,6 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 @keyframes floatUp {
   0%   { transform: translateY(0) scale(0.6) rotate(0); opacity: 1; }
   100% { transform: translateY(-118vh) scale(1.25) rotate(35deg); opacity: 0; }
-}
-
-/* ---------- Responsive ---------- */
-/* Texto largo (nombres de sitios, resultados, URLs) nunca desborda */
-.sub, .place .name, .place .meta, .search-results li, .done p { overflow-wrap: anywhere; }
-
-/* Tablet y ventanas medianas */
-@media (max-width: 820px) {
-  .stage { padding: clamp(14px, 3.5vw, 32px); }
-  .screen { padding: clamp(14px, 3.5vw, 32px); }
-  .options { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-}
-
-/* Móvil */
-@media (max-width: 560px) {
-  .card { padding: clamp(24px, 6vw, 34px); border-radius: 22px; }
-  .card-wide { text-align: center; }
-  .ask { font-size: clamp(2.8rem, 15vw, 4rem); }
-  .options { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .option { padding: 20px 10px; }
-  .map { height: clamp(220px, 52vh, 340px); }
-  /* fecha y hora: cada campo a lo ancho */
-  .cuando-box { gap: 10px; }
-  .cuando-box label { flex: 1 1 100%; }
-  .cuando-box input { width: 100%; }
-  /* acciones del mapa: botón principal a lo ancho */
-  .map-actions { flex-direction: column; align-items: stretch; }
-  .map-actions .btn-si { width: 100%; justify-content: center; }
-  .place { flex-wrap: wrap; }
-  .place .pick { margin-left: auto; }
-  .badge-tilt { right: 12px; }
-}
-
-/* Móvil pequeño (≤360px): título más contenido y una sola columna */
-@media (max-width: 360px) {
-  .ask { font-size: clamp(2.2rem, 13vw, 3rem); }
-  .options { grid-template-columns: 1fr; }
-  .btn { padding: 13px 24px; font-size: 1rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .screen, .btn, .option, .heart, .splash-mark, .loading-msg { transition: none; animation: none; }
 }
 
 /* ---------- Landing: "¿Quedamos?" ---------- */
@@ -457,7 +442,7 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 .crear-note .inline-ico { color: var(--gold); }
 
 /* ---------- Fecha y hora de la cita ---------- */
-.cuando-box { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 14px 0 4px; }
+.cuando-box { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: clamp(6px, 1.6vh, 10px) 0 4px; }
 .cuando-box label { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
 .cuando-box input {
   font-family: var(--font-body); font-weight: 600; font-size: 0.95rem; color: var(--ivory);
@@ -467,7 +452,7 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 .cuando-box input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(211, 176, 106, 0.16); }
 
 /* ---------- Mapa: buscador + área ---------- */
-.map-toolbar { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
+.map-toolbar { display: flex; gap: 10px; align-items: flex-start; margin-bottom: clamp(6px, 1.4vh, 10px); }
 .search-box { position: relative; flex: 1 1 auto; }
 .search-box .search-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted-2); pointer-events: none; }
 .search-box .search-ico .icon { width: 18px; height: 18px; }
@@ -503,7 +488,88 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 .btn-ghost:hover { border-color: var(--gold); box-shadow: var(--glow-gold); }
 .btn-ghost.loading { opacity: .55; pointer-events: none; }
 
-.map-help { text-align: center; color: var(--muted-2); font-weight: 600; font-size: 0.86rem; margin: 12px 0 14px; }
+.map-help { text-align: center; color: var(--muted-2); font-weight: 600; font-size: 0.86rem; margin: clamp(6px, 1.6vh, 12px) 0 clamp(6px, 1.6vh, 14px); }
 .map-help b { color: var(--gold); }
 .map-actions { display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; }
 .map-actions .link-back { margin-top: 0; }
+
+/* ---------- Responsive ----------
+   Al final del archivo a propósito: así estas reglas siempre ganan la
+   cascada frente a cualquier regla base de arriba, sea cual sea su selector. */
+/* Texto largo (nombres de sitios, resultados, URLs) nunca desborda */
+.sub, .place .name, .place .meta, .search-results li, .done p { overflow-wrap: anywhere; }
+
+/* Tablet y ventanas medianas */
+@media (max-width: 820px) {
+  .options { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+}
+
+/* Móvil */
+@media (max-width: 560px) {
+  .card { padding: clamp(18px, min(6vw, 5vh), 34px); border-radius: 22px; }
+  .card-wide { text-align: center; }
+  .card-wide > .badge, .card-wide > .link-back { align-self: center; }
+  .ask { font-size: clamp(2rem, min(15vw, 9vh), 4rem); }
+  .options { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .option { padding: clamp(10px, 2.6vh, 20px) 10px; }
+  .map { height: clamp(100px, 32vh, 260px); }
+  /* fecha y hora: lado a lado mientras quepan, apiladas solo si no caben */
+  .cuando-box { gap: 10px; }
+  .cuando-box label { flex: 1 1 140px; }
+  .cuando-box input { width: 100%; }
+  /* acciones del mapa: botón principal a lo ancho */
+  .map-actions { flex-direction: column; align-items: stretch; }
+  .map-actions .btn-si { width: 100%; justify-content: center; }
+  .place { flex-wrap: wrap; }
+  .place .pick { margin-left: auto; }
+  .badge-tilt { right: 12px; }
+}
+
+/* Móvil pequeño (≤360px): título más contenido y una sola columna */
+@media (max-width: 360px) {
+  .ask { font-size: clamp(1.8rem, min(13vw, 8vh), 3rem); }
+  .options { grid-template-columns: 1fr; }
+  .btn { padding: 13px 24px; font-size: 1rem; }
+}
+
+/* Ventanas bajas (portátil sin maximizar, tablet apaisada, móvil apaisado):
+   compactamos aunque el ancho sea de sobra, para que nunca haga falta scroll. */
+@media (max-height: 700px) {
+  .badge-tilt { top: -10px; }
+  .options { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+  .map { height: clamp(100px, 26vh, 300px); }
+  .map-help { display: none; }
+  .map-toolbar { margin-bottom: 6px; }
+  .cuando-box { margin: 6px 0 2px; }
+  .results-help { margin: 6px 0 4px; }
+}
+@media (max-height: 560px) {
+  .footer-note, .hint { display: none; }
+  .badge:not(.badge-tilt) { display: none; }
+  .option .tiny { display: none; }
+  .map { height: clamp(80px, 20vh, 300px); }
+  .cuando-box input { padding: 7px 10px; }
+  #geo-search { padding: 10px 12px 10px 38px; }
+  .btn-ghost { width: 42px; height: 42px; }
+  .done-ico { width: 48px; height: 48px; margin-bottom: 8px; }
+  .done-ico .icon { width: 26px; height: 26px; }
+  .done h3 { font-size: 1.5rem; margin-bottom: 4px; }
+}
+@media (max-height: 420px) {
+  .eyebrow { display: none; }
+  .btn { padding: 11px 26px; }
+  .crear-form { gap: 8px; }
+  .crear-form input { padding: 10px 14px; }
+  .crear-form .btn { margin-top: 4px; }
+}
+/* Casos extremos (pantalla plegable cerrada, ventana redimensionada al mínimo) */
+@media (max-height: 320px) {
+  .ask { margin-bottom: 4px; }
+  .sub { margin-bottom: 8px; }
+  .crear-form { gap: 6px; }
+  .crear-form input { padding: 7px 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen, .btn, .option, .heart, .splash-mark, .loading-msg { transition: none; animation: none; }
+}
