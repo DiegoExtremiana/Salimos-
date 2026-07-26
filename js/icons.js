@@ -64,6 +64,7 @@ const ICON_PATHS = {
   refresh:   '<path d="M20 11a8 8 0 1 0-.5 4M20 5v6h-6"/>',
   save:      '<path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/>',
   user:      '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  camera:    '<path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4zM12 17.5a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>',
 };
 
 function svgIcon(id, cls = 'icon') {

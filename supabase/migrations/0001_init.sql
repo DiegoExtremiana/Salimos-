@@ -36,8 +36,10 @@ create table if not exists public.invitaciones (
   created_at  timestamptz not null default now(),
   slug        text not null unique,
   nombre      text not null,
-  mote        text
+  mote        text,
+  foto_url    text          -- foto opcional de la persona invitada
 );
+alter table public.invitaciones add column if not exists foto_url text;
 
 -- ---------- Citas ----------
 create table if not exists public.citas (
@@ -63,12 +65,14 @@ create table if not exists public.citas (
   area_radio    integer,
   area_bbox     text,
   nota          smallint check (nota is null or (nota >= 0 and nota <= 10)),
-  notas_admin   text
+  notas_admin   text,
+  foto_url      text                  -- foto de la cita (data URL, ya redimensionada en el navegador)
 );
 -- columnas añadidas si la tabla ya existía de antes
 alter table public.citas add column if not exists categoria    text;
 alter table public.citas add column if not exists contacto_cif bytea;
 alter table public.citas add column if not exists fecha_cita   timestamptz;
+alter table public.citas add column if not exists foto_url     text;
 create index if not exists citas_created_idx on public.citas (created_at desc);
 
 -- ---------- RLS: activada y SIN políticas de cliente ----------
@@ -214,13 +218,17 @@ begin
 end;
 $$;
 
-create or replace function public.admin_actualizar_cita(p_token text, p_id uuid, p_nota smallint, p_notas text)
+-- Firma con foto añadida: se borra la versión anterior (4 args) para que
+-- PostgREST no dude entre dos sobrecargas (mismo problema que registrar_cita).
+drop function if exists public.admin_actualizar_cita(text, uuid, smallint, text);
+
+create or replace function public.admin_actualizar_cita(p_token text, p_id uuid, p_nota smallint, p_notas text, p_foto_url text)
 returns void
 language plpgsql security definer set search_path = public, extensions
 as $$
 begin
   if public.sesion_usuario(p_token) is null then raise exception 'no_autorizado'; end if;
-  update public.citas set nota = p_nota, notas_admin = p_notas where id = p_id;
+  update public.citas set nota = p_nota, notas_admin = p_notas, foto_url = p_foto_url where id = p_id;
 end;
 $$;
 
@@ -244,14 +252,16 @@ begin
 end;
 $$;
 
-create or replace function public.admin_crear_invitacion(p_token text, p_slug text, p_nombre text, p_mote text)
+drop function if exists public.admin_crear_invitacion(text, text, text, text);
+
+create or replace function public.admin_crear_invitacion(p_token text, p_slug text, p_nombre text, p_mote text, p_foto_url text)
 returns public.invitaciones
 language plpgsql security definer set search_path = public, extensions
 as $$
 declare v_row public.invitaciones;
 begin
   if public.sesion_usuario(p_token) is null then raise exception 'no_autorizado'; end if;
-  insert into public.invitaciones (slug, nombre, mote) values (p_slug, p_nombre, nullif(p_mote, '')) returning * into v_row;
+  insert into public.invitaciones (slug, nombre, mote, foto_url) values (p_slug, p_nombre, nullif(p_mote, ''), p_foto_url) returning * into v_row;
   return v_row;
 end;
 $$;
@@ -275,8 +285,8 @@ grant execute on function public.logout_admin(text)                             
 grant execute on function public.obtener_invitacion(text)                         to anon, authenticated;
 grant execute on function public.registrar_cita(uuid, text, text, text, text, text, text, text, text, timestamptz, text, double precision, double precision, text, double precision, double precision, integer, text) to anon, authenticated;
 grant execute on function public.admin_citas(text)                                to anon, authenticated;
-grant execute on function public.admin_actualizar_cita(text, uuid, smallint, text) to anon, authenticated;
+grant execute on function public.admin_actualizar_cita(text, uuid, smallint, text, text) to anon, authenticated;
 grant execute on function public.admin_borrar_cita(text, uuid)                    to anon, authenticated;
 grant execute on function public.admin_invitaciones(text)                         to anon, authenticated;
-grant execute on function public.admin_crear_invitacion(text, text, text, text)   to anon, authenticated;
+grant execute on function public.admin_crear_invitacion(text, text, text, text, text) to anon, authenticated;
 grant execute on function public.admin_borrar_invitacion(text, uuid)              to anon, authenticated;

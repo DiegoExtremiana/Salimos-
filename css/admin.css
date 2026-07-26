@@ -172,6 +172,12 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 .editor a { color: var(--gold); font-weight: 700; text-decoration: none; }
 .editor a:hover { text-decoration: underline; }
 .editor-actions { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; }
+
+/* ---------- Selector de foto (cita / invitación) ---------- */
+.foto-box { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.foto-preview { width: 110px; height: 110px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line-2); background: rgba(0, 0, 0, 0.3); }
+.foto-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.foto-pick { cursor: pointer; }
 .btn-save { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--gold), var(--gold-dk)); color: #2a1410; border: none; border-radius: 10px; padding: 11px 18px; font-weight: 800; }
 .btn-save:hover { filter: brightness(1.06); }
 .btn-del { display: inline-flex; align-items: center; gap: 8px; background: none; color: var(--danger); border: 1px solid rgba(226, 105, 95, .4); border-radius: 10px; padding: 11px 16px; font-weight: 800; }
@@ -188,6 +194,8 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
   background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px;
 }
 .invite-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.invite-id { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.invite-avatar { width: 42px; height: 42px; border-radius: 10px; object-fit: cover; border: 1px solid var(--line-2); flex: 0 0 auto; }
 .invite-who { min-width: 0; }
 .invite h4 { font-size: 1.05rem; margin-bottom: 2px; color: var(--text); }
 .invite .mote { color: var(--muted); font-size: 0.85rem; font-weight: 700; }

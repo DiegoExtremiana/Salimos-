@@ -58,6 +58,72 @@ function randSlug() {
 }
 function requireDB() { return !!window.sb; }
 
+/* ---------- foto (cita / invitación): redimensionada en el navegador,
+   se guarda como data URL en la propia fila (misma vía RPC con token
+   que todo lo demás, sin infraestructura nueva) ---------- */
+function leerFotoRedimensionada(file, maxSize = 1280, calidad = 0.82) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxSize || height > maxSize) {
+        const ratio = Math.min(maxSize / width, maxSize / height);
+        width = Math.round(width * ratio); height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', calidad));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('no se pudo leer la imagen')); };
+    img.src = url;
+  });
+}
+function fotoPickerHTML(ns, urlActual) {
+  const tiene = !!urlActual;
+  return `
+    <div class="foto-box">
+      <img id="foto-preview-${ns}" class="foto-preview" src="${urlActual || ''}" ${tiene ? '' : 'hidden'} alt="" />
+      <div class="foto-actions">
+        <label class="btn-line foto-pick">
+          <span data-icon="camera"></span> <span id="foto-pick-label-${ns}">${tiene ? 'Cambiar foto' : 'Añadir foto'}</span>
+          <input type="file" id="foto-input-${ns}" accept="image/*" hidden />
+        </label>
+        <button type="button" class="btn-del" id="foto-quitar-${ns}" ${tiene ? '' : 'hidden'}><span data-icon="trash"></span> Quitar foto</button>
+      </div>
+    </div>`;
+}
+function wireFotoPicker(ns) {
+  const input = document.getElementById(`foto-input-${ns}`);
+  const preview = document.getElementById(`foto-preview-${ns}`);
+  const quitar = document.getElementById(`foto-quitar-${ns}`);
+  const label = document.getElementById(`foto-pick-label-${ns}`);
+  input.addEventListener('change', async () => {
+    const file = input.files[0];
+    if (!file) return;
+    try {
+      preview.src = await leerFotoRedimensionada(file);
+      preview.hidden = false;
+      quitar.hidden = false;
+      label.textContent = 'Cambiar foto';
+    } catch { alert('No se pudo leer la imagen.'); }
+  });
+  quitar.addEventListener('click', () => resetFotoPicker(ns));
+}
+function resetFotoPicker(ns) {
+  document.getElementById(`foto-preview-${ns}`).src = '';
+  document.getElementById(`foto-preview-${ns}`).hidden = true;
+  document.getElementById(`foto-quitar-${ns}`).hidden = true;
+  document.getElementById(`foto-pick-label-${ns}`).textContent = 'Añadir foto';
+  document.getElementById(`foto-input-${ns}`).value = '';
+}
+function fotoActual(ns) {
+  const preview = document.getElementById(`foto-preview-${ns}`);
+  return preview.hidden ? null : preview.src;
+}
+
 /* ---------- login / sesión ---------- */
 function showLogin() {
   document.getElementById('login').hidden = false;
@@ -195,6 +261,10 @@ function editorHTML(r) {
         <div class="lbl">Notas del admin</div>
         <textarea id="ed-notas" placeholder="Qué tal fue, anécdotas, si repetiríamos…">${esc(r.notas_admin) || ''}</textarea>
       </div>
+      <div class="full">
+        <div class="lbl">Foto de la cita</div>
+        ${fotoPickerHTML('cita', r.foto_url)}
+      </div>
       <div class="editor-actions">
         <button class="btn-save" id="ed-save"><span data-icon="save"></span> Guardar</button>
         <button class="btn-del" id="ed-del"><span data-icon="trash"></span> Borrar</button>
@@ -210,6 +280,7 @@ function abrirModalCita(r) {
   const body = document.getElementById('modal-cita-body');
   body.innerHTML = editorHTML(r);
   pintarIconos(body);
+  wireFotoPicker('cita');
   document.getElementById('ed-save').addEventListener('click', () => guardarCita(r.id));
   document.getElementById('ed-del').addEventListener('click', () => borrarCita(r.id));
   document.getElementById('modal-cita').hidden = false;
@@ -225,13 +296,14 @@ async function guardarCita(id) {
   const notaVal = document.getElementById('ed-nota').value;
   const p_nota = notaVal === '' ? null : parseInt(notaVal, 10);
   const p_notas = document.getElementById('ed-notas').value || null;
-  const { error } = await window.sb.rpc('admin_actualizar_cita', { p_token: token, p_id: id, p_nota, p_notas });
+  const p_foto_url = fotoActual('cita');
+  const { error } = await window.sb.rpc('admin_actualizar_cita', { p_token: token, p_id: id, p_nota, p_notas, p_foto_url });
   if (error) {
     if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
     msg.style.color = '#ef4444'; msg.textContent = 'Error al guardar.'; return;
   }
   const row = rows.find((r) => r.id === id);
-  if (row) { row.nota = p_nota; row.notas_admin = p_notas; }
+  if (row) { row.nota = p_nota; row.notas_admin = p_notas; row.foto_url = p_foto_url; }
   msg.style.color = ''; msg.textContent = 'Guardado ✓';
 }
 
@@ -265,7 +337,10 @@ async function loadInvites() {
     div.className = 'invite';
     div.innerHTML =
       `<div class="invite-head">` +
-        `<div class="invite-who"><h4>${esc(inv.nombre)}</h4><div class="mote">${esc(inv.mote) || 'sin mote'}</div></div>` +
+        `<div class="invite-id">` +
+          (inv.foto_url ? `<img class="invite-avatar" src="${esc(inv.foto_url)}" alt="" />` : '') +
+          `<div class="invite-who"><h4>${esc(inv.nombre)}</h4><div class="mote">${esc(inv.mote) || 'sin mote'}</div></div>` +
+        `</div>` +
         `<button class="icon-btn del-btn" title="Borrar invitación">${window.svgIcon('trash', 'icon')}</button>` +
       `</div>` +
       `<div class="url"><input type="text" readonly value="${esc(url)}" /><button class="icon-btn copy-btn" title="Copiar">${window.svgIcon('copy', 'icon')}</button></div>`;
@@ -291,7 +366,8 @@ async function crearInvitacion(e) {
   const mote = document.getElementById('inv-mote').value.trim();
   if (!nombre) return;
   const slug = randSlug();
-  const { error } = await window.sb.rpc('admin_crear_invitacion', { p_token: token, p_slug: slug, p_nombre: nombre, p_mote: mote });
+  const p_foto_url = fotoActual('invite');
+  const { error } = await window.sb.rpc('admin_crear_invitacion', { p_token: token, p_slug: slug, p_nombre: nombre, p_mote: mote, p_foto_url });
   if (error) {
     if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
     alert('No se pudo crear: ' + error.message); return;
@@ -311,6 +387,7 @@ async function copiar(text, btn) {
 function abrirModal() {
   document.getElementById('invite-form').reset();
   document.getElementById('invite-result').hidden = true;
+  resetFotoPicker('invite');
   document.getElementById('modal').hidden = false;
 }
 function cerrarModal() { document.getElementById('modal').hidden = true; }
@@ -318,6 +395,10 @@ function cerrarModal() { document.getElementById('modal').hidden = true; }
 /* ---------- arranque ---------- */
 document.addEventListener('DOMContentLoaded', async () => {
   pintarIconos();
+
+  document.getElementById('invite-foto-slot').innerHTML = fotoPickerHTML('invite', '');
+  pintarIconos(document.getElementById('invite-foto-slot'));
+  wireFotoPicker('invite');
 
   document.getElementById('login-form').addEventListener('submit', iniciarSesion);
   document.getElementById('btn-logout').addEventListener('click', cerrarSesion);
