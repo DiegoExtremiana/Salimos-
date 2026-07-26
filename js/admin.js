@@ -60,6 +60,44 @@ function randSlug() {
 }
 function requireDB() { return !!window.sb; }
 
+/* ---------- confirmación / aviso: nunca confirm()/alert() nativos ---------- */
+function preguntar({ titulo = '¿Seguro?', texto = '', icono = 'trash', textoOk = 'Confirmar', soloAviso = false } = {}) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('modal-confirm');
+    document.getElementById('modal-confirm-title-text').textContent = titulo;
+    document.getElementById('modal-confirm-text').textContent = texto;
+    const iconoEl = modal.querySelector('h3 [data-icon]');
+    iconoEl.dataset.icon = icono;
+    delete iconoEl.dataset.done;
+    pintarIconos(modal);
+    const btnOk = document.getElementById('modal-confirm-ok');
+    const btnCancel = document.getElementById('modal-confirm-cancel');
+    btnOk.textContent = textoOk;
+    btnCancel.hidden = soloAviso;
+    btnOk.className = soloAviso ? 'btn-primary' : 'btn-del';
+
+    function limpiar(valor) {
+      modal.hidden = true;
+      btnOk.removeEventListener('click', onOk);
+      btnCancel.removeEventListener('click', onCancel);
+      modal.removeEventListener('click', onBackdrop);
+      document.removeEventListener('keydown', onKey);
+      resolve(valor);
+    }
+    function onOk() { limpiar(true); }
+    function onCancel() { limpiar(false); }
+    function onBackdrop(e) { if (e.target === modal) limpiar(false); }
+    function onKey(e) { if (e.key === 'Escape') limpiar(false); }
+    btnOk.addEventListener('click', onOk);
+    btnCancel.addEventListener('click', onCancel);
+    modal.addEventListener('click', onBackdrop);
+    document.addEventListener('keydown', onKey);
+    modal.hidden = false;
+  });
+}
+function confirmar(texto, opts) { return preguntar({ titulo: '¿Seguro?', texto, icono: 'trash', textoOk: 'Sí, continuar', ...opts }); }
+function avisar(texto, opts) { return preguntar({ titulo: 'Aviso', texto, icono: 'sparkle', textoOk: 'Entendido', soloAviso: true, ...opts }); }
+
 /* ---------- foto (cita / invitación): redimensionada en el navegador,
    se guarda como data URL en la propia fila (misma vía RPC con token
    que todo lo demás, sin infraestructura nueva) ---------- */
@@ -110,7 +148,7 @@ function wireFotoPicker(ns) {
       preview.hidden = false;
       quitar.hidden = false;
       label.textContent = 'Cambiar foto';
-    } catch { alert('No se pudo leer la imagen.'); }
+    } catch { await avisar('No se pudo leer la imagen.'); }
   });
   quitar.addEventListener('click', () => resetFotoPicker(ns));
 }
@@ -380,11 +418,11 @@ async function guardarCita(id) {
 }
 
 async function borrarCita(id) {
-  if (!confirm('¿Borrar esta cita del registro? No se puede deshacer.')) return;
+  if (!(await confirmar('¿Borrar esta cita del registro? No se puede deshacer.'))) return;
   const { error } = await window.sb.rpc('admin_borrar_cita', { p_token: token, p_id: id });
   if (error) {
     if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
-    alert('No se pudo borrar: ' + error.message); return;
+    await avisar('No se pudo borrar: ' + error.message); return;
   }
   rows = rows.filter((r) => r.id !== id);
   cerrarModalCita();
@@ -423,11 +461,11 @@ async function loadInvites() {
 }
 
 async function borrarInvitacion(id, nombre) {
-  if (!confirm(`¿Borrar la invitación de ${nombre}? El enlace dejará de funcionar. Las citas ya registradas se conservan.`)) return;
+  if (!(await confirmar(`¿Borrar la invitación de ${nombre}? El enlace dejará de funcionar. Las citas ya registradas se conservan.`))) return;
   const { error } = await window.sb.rpc('admin_borrar_invitacion', { p_token: token, p_id: id });
   if (error) {
     if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
-    alert('No se pudo borrar: ' + error.message); return;
+    await avisar('No se pudo borrar: ' + error.message); return;
   }
   loadInvites();
 }
@@ -442,7 +480,7 @@ async function crearInvitacion(e) {
   const { error } = await window.sb.rpc('admin_crear_invitacion', { p_token: token, p_slug: slug, p_nombre: nombre, p_mote: mote, p_foto_url });
   if (error) {
     if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
-    alert('No se pudo crear: ' + error.message); return;
+    await avisar('No se pudo crear: ' + error.message); return;
   }
   const url = urlInvitacion(slug);
   document.getElementById('invite-url').value = url;

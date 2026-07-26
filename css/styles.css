@@ -271,6 +271,14 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   gap: clamp(6px, 1.6vh, 14px);
   margin-top: 6px;
 }
+/* Número impar de opciones: la última va centrada y a tamaño de una tarjeta,
+   no estirada a todo el ancho de la fila. */
+.options > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: 100%;
+  max-width: 200px;
+}
 .option {
   display: flex;
   flex-direction: column;
@@ -528,6 +536,8 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 @media (max-width: 360px) {
   .ask { font-size: clamp(1.8rem, min(13vw, 8vh), 3rem); }
   .options { grid-template-columns: 1fr; }
+  /* ya es una sola columna: la última no necesita centrarse aparte */
+  .options > :last-child:nth-child(odd) { grid-column: auto; justify-self: stretch; width: auto; max-width: none; }
   .btn { padding: 13px 24px; font-size: 1rem; }
 }
 

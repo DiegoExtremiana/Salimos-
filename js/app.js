@@ -39,7 +39,7 @@ const COCINAS_COMIDA = [
 const COCINAS_DESAYUNO = [
   { id: 'cafe',    label: 'Café y tostada', osm: { amenity: 'cafe' } },
   { id: 'churros', label: 'Churros',        osm: { amenity: FOOD, cuisine: 'churro|spanish' } },
-  { id: 'bakery',  label: 'Bollería',       osm: { shop: 'bakery|pastry' } },
+  { id: 'bakery',  label: 'Dulce',          osm: { shop: 'bakery|pastry' } },
   { id: 'brunch',  label: 'Brunch',         osm: { amenity: 'cafe|restaurant', cuisine: 'breakfast|brunch|american' } },
 ];
 const PLANES_PASEO = [
@@ -124,7 +124,7 @@ function setupBroma() {
 
 /* ========================= Pantalla 1 — "No" que huye ========================= */
 const LABELS_NO = ['No', '¿Seguro?', 'Piénsalo', 'Nop', 'Casi', 'Ni de broma', 'Insiste', 'Que no 😅'];
-let noHits = 0, roaming = false;
+let noHits = 0, roaming = false, respondido = false;
 
 function setupHuida() {
   const btnNo = document.getElementById('btn-no');
@@ -177,6 +177,10 @@ function setupHuida() {
   }
 
   function saltar(px, py) {
+    // Entre pulsar "Sí" y que cambie de pantalla hay 450ms de margen (corazones);
+    // si el ratón se mueve cerca del "No" en ese hueco, sin esto volvería a huir
+    // (y a re-engancharse al body) justo después de haberlo devuelto a su sitio.
+    if (respondido) return;
     fijar();
     noHits++;
     const span = btnNo.querySelector('span'); if (span) span.style.display = 'none';
@@ -211,6 +215,7 @@ function setupHuida() {
   btnNo.addEventListener('pointerdown', (e) => { e.preventDefault(); saltar(e.clientX, e.clientY); });
   btnNo.addEventListener('click', (e) => { e.preventDefault(); saltar(e.clientX, e.clientY); });
   btnSi.addEventListener('click', () => {
+    respondido = true;   // ya no huye más, ni aunque el ratón pase cerca antes de cambiar de pantalla
     lanzarCorazones();
     // Aquí se acaba la huida: el botón vive en <body> mientras huye, así que
     // si no lo devolvemos a su sitio se quedaría visible en las pantallas

@@ -106,6 +106,18 @@
     </div>
   </div>
 
+  <!-- Modal confirmación / aviso (sustituye a confirm()/alert() nativos) -->
+  <div id="modal-confirm" class="modal-back" hidden>
+    <div class="modal modal-confirm">
+      <h3><span data-icon="trash"></span> <span id="modal-confirm-title-text">¿Seguro?</span></h3>
+      <p class="sub" id="modal-confirm-text"></p>
+      <div class="editor-actions">
+        <button class="btn-del" id="modal-confirm-ok">Confirmar</button>
+        <button class="btn-line" id="modal-confirm-cancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal invitación -->
   <div id="modal" class="modal-back" hidden>
     <div class="modal">
