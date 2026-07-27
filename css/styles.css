@@ -193,7 +193,12 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   text-shadow: 0 2px 30px rgba(0, 0, 0, 0.5);
   overflow-wrap: break-word;   /* palabras largas parten antes de desbordar */
 }
-.ask-sm { font-size: clamp(1.6rem, min(7vw, 5.6vh), 3.2rem); }
+/* Doble clase a propósito: los media queries del final redefinen .ask, y con
+   un solo selector le ganaban por orden a estas variantes. */
+.ask.ask-sm { font-size: clamp(1.6rem, min(7vw, 5.6vh), 3.2rem); }
+/* Preguntas de una frase entera: al tamaño de .ask no caben sin comerse la
+   tarjeta, así que bajan de cuerpo y ganan interlineado. */
+.ask.ask-long { font-size: clamp(1.35rem, min(5.6vw, 4.6vh), 2.4rem); line-height: 1.14; }
 
 .sub {
   color: var(--muted);

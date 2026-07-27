@@ -101,9 +101,11 @@ async function resolverInvitacion() {
 }
 
 function revelarApp() {
-  const nombre = cita.nombre ? escapar(cita.nombre) : '';
-  document.getElementById('salimos-eyebrow').textContent =
-    nombre ? `Oye ${cita.nombre}, una pregunta rapidísima` : 'una pregunta rapidísima';
+  const nombre = (cita.nombre || '').trim();
+  document.getElementById('salimos-ask').textContent = nombre
+    ? `Oye ${nombre}, ¿quieres tener una cita inolvidable conmigo?`
+    : '¡Hola! ¿Quieres tener una cita inolvidable conmigo?';
+  document.getElementById('salimos-eyebrow').textContent = 'una pregunta rapidísima';
   goTo('screen-salimos');
 }
 
