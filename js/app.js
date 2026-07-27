@@ -645,6 +645,12 @@ function validarCuando() {
 }
 
 /* ========================= Cierre + guardado en Supabase ========================= */
+/* PostgREST responde PGRST202 cuando ninguna versión de la función encaja con
+   los parámetros que le mandamos (aquí: una BD sin la migración 0004). */
+function esFirmaVieja(error) {
+  return error.code === 'PGRST202' || /p_foto_url|schema cache/i.test(error.message || '');
+}
+
 async function cerrarCita(place) {
   // Puerta final: si el día u hora elegidos ya pasaron, no se cierra nada.
   if (!validarCuando()) {
@@ -707,7 +713,14 @@ async function cerrarCita(place) {
   const logEl = document.getElementById('done-log');
   if (!window.sb) { console.info('[registro local — sin Supabase]', params); logEl.textContent = 'Guardado en local (modo prueba).'; return; }
   try {
-    const { error } = await window.sb.rpc('registrar_cita', params);
+    let { error } = await window.sb.rpc('registrar_cita', params);
+    // Si la BD todavía es la de antes de la migración 0004 no conoce
+    // p_foto_url y rechaza la llamada entera. Antes de dar la cita por
+    // perdida, se reintenta sin la foto: es lo prescindible de la fila.
+    if (error && esFirmaVieja(error)) {
+      const { p_foto_url, ...sinFoto } = params;
+      ({ error } = await window.sb.rpc('registrar_cita', sinFoto));
+    }
     logEl.textContent = error ? 'No se pudo registrar (pero la cita sigue en pie).' : 'Cita registrada 📝';
     if (error) console.error(error);
   } catch (e) { logEl.textContent = 'No se pudo registrar (pero la cita sigue en pie).'; console.error(e); }
