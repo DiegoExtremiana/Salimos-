@@ -471,14 +471,14 @@ async function loadInvites() {
     const div = document.createElement('div');
     div.className = 'invite';
     div.innerHTML =
-      `<div class="invite-head">` +
-        `<div class="invite-id">` +
-          (inv.foto_url ? `<img class="invite-avatar" src="${esc(inv.foto_url)}" alt="" />` : '') +
-          `<div class="invite-who"><h4>${esc(inv.nombre)}</h4><div class="mote">${esc(inv.mote) || 'sin mote'}</div></div>` +
-        `</div>` +
+      `<div class="invite-foto">` +
+        avatarHTML(inv.foto_url, inv.nombre, 'avatar invite-avatar') +
         `<button class="icon-btn del-btn" title="Borrar invitación">${window.svgIcon('trash', 'icon')}</button>` +
       `</div>` +
-      `<div class="url"><input type="text" readonly value="${esc(url)}" /><button class="icon-btn copy-btn" title="Copiar">${window.svgIcon('copy', 'icon')}</button></div>`;
+      `<div class="invite-body">` +
+        `<div class="invite-who"><h4>${esc(inv.nombre)}</h4><div class="mote">${esc(inv.mote) || 'sin mote'}</div></div>` +
+        `<div class="url"><input type="text" readonly value="${escAttr(url)}" /><button class="icon-btn copy-btn" title="Copiar">${window.svgIcon('copy', 'icon')}</button></div>` +
+      `</div>`;
     div.querySelector('.copy-btn').addEventListener('click', () => copiar(url, div.querySelector('.copy-btn')));
     div.querySelector('.del-btn').addEventListener('click', () => borrarInvitacion(inv.id, inv.nombre));
     cont.appendChild(div);

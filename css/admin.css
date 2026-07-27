@@ -219,17 +219,26 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 .save-msg { color: var(--ok); font-weight: 700; font-size: 0.88rem; }
 .empty { text-align: center; color: var(--muted); font-weight: 700; padding: 44px 10px; }
 
-/* ---------- Invitaciones ---------- */
+/* ---------- Invitaciones (cuadrícula de fichas con foto) ---------- */
 .invite-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;
-  overflow-y: auto; flex: 1 1 auto; min-height: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px;
+  align-content: start; overflow-y: auto; flex: 1 1 auto; min-height: 0;
 }
 .invite {
-  background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px;
+  overflow: hidden; display: flex; flex-direction: column;
 }
-.invite-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-.invite-id { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.invite-avatar { width: 42px; height: 42px; border-radius: 10px; object-fit: cover; border: 1px solid var(--line-2); flex: 0 0 auto; }
+.invite-foto { position: relative; }
+.invite-foto .del-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(10, 5, 8, 0.66); border-color: rgba(226, 105, 95, .55);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.avatar.invite-avatar {
+  width: 100%; height: auto; aspect-ratio: 1; border: none;
+  border-bottom: 1px solid var(--line); border-radius: 0; font-size: 2.4rem;
+}
+.invite-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
 .invite-who { min-width: 0; }
 .invite h4 { font-size: 1.05rem; margin-bottom: 2px; color: var(--text); }
 .invite .mote { color: var(--muted); font-size: 0.85rem; font-weight: 700; }
@@ -345,7 +354,9 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
   table.db th, table.db td { padding: 10px 12px; }
   .editor { grid-template-columns: 1fr; padding: 16px; gap: 14px; }
   .editor-actions { flex-wrap: wrap; }
-  .invite-grid { grid-template-columns: 1fr; }
+  .invite-grid { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 12px; }
+  .invite-body { padding: 10px 11px 12px; gap: 8px; }
+  .invite h4 { font-size: 0.95rem; }
   .modal { padding: 22px; }
   .fab { right: 16px; bottom: 16px; width: 54px; height: 54px; }
   .login-card { padding: 32px 24px; }
