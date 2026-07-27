@@ -378,6 +378,18 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
 }
 .leaflet-container { background: #0d0b0a; font-family: var(--font-body); }
+/* El crédito de OSM viene con fondo blanco de fábrica: sobre el mapa oscuro
+   era la única esquina que delataba que el mapa es de otro. */
+.leaflet-control-attribution {
+  background: rgba(12, 10, 9, 0.72) !important;
+  color: var(--muted-2);
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 10px 0 0 0;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.leaflet-control-attribution a { color: var(--muted); }
+.leaflet-control-attribution a:hover { color: var(--gold); }
 .leaflet-popup-content-wrapper { background: var(--panel-solid); color: var(--ivory); border-radius: 12px; box-shadow: var(--shadow); }
 .leaflet-popup-content { font-weight: 600; }
 .leaflet-popup-tip { background: var(--panel-solid); }
@@ -660,6 +672,24 @@ button, .option, .place .pick { -webkit-user-select: none; user-select: none; }
   .sub { margin-bottom: 8px; }
   .crear-form { gap: 6px; }
   .crear-form input { padding: 7px 12px; }
+}
+
+/* Táctil: sin ratón no hay "quitar el dedo de encima", así que el :hover se
+   queda pegado después de tocar (una opción elegida se veía levantada y
+   dorada para siempre). En pantallas sin puntero fino, el estado de reposo. */
+@media (hover: none) {
+  .option:hover {
+    transform: none; background: rgba(255, 255, 255, 0.03);
+    border-color: var(--line); box-shadow: none;
+  }
+  .option:hover .icon { color: var(--gold-dk); }
+  .btn-si:hover { filter: none; box-shadow: var(--glow-gold); transform: none; }
+  .place:hover { border-color: var(--line); box-shadow: none; }
+  .place .pick:hover { background: transparent; color: var(--gold); box-shadow: none; }
+  .polaroid:hover { transform: rotate(-2.5deg); box-shadow: 0 20px 44px rgba(0, 0, 0, 0.55); }
+  .link-back:hover { color: var(--muted-2); }
+  .search-results li:hover { background: transparent; color: var(--ivory-soft); }
+  .btn-ghost:hover { border-color: var(--line-2); box-shadow: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

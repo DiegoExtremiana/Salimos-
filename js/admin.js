@@ -321,12 +321,14 @@ function setView(view) {
 /* ---------- CITAS ---------- */
 async function loadCitas() {
   const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '<tr><td class="empty">Cargando…</td></tr>';
+  // colspan: al refrescar, la cabecera ya está pintada y sin él el mensaje
+  // se metería en la primera columna (la de la foto, de 38px).
+  tbody.innerHTML = `<tr><td class="empty cargando" colspan="${COLS.length}">Cargando…</td></tr>`;
   await cargarInvitaciones();   // sus fotos son las que salen en la tabla
   const { data, error } = await window.sb.rpc('admin_citas', { p_token: token });
   if (error) {
     if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
-    tbody.innerHTML = `<tr><td class="empty">Error: ${esc(error.message)}</td></tr>`;
+    tbody.innerHTML = `<tr><td class="empty" colspan="${COLS.length}">Error: ${esc(error.message)}</td></tr>`;
     return;
   }
   rows = data || [];
@@ -518,7 +520,7 @@ async function cargarInvitaciones() {
 
 async function loadInvites() {
   const cont = document.getElementById('invite-list');
-  cont.innerHTML = '<p class="empty">Cargando…</p>';
+  cont.innerHTML = '<p class="empty cargando">Cargando…</p>';
   const error = await cargarInvitaciones();
   if (error) { cont.innerHTML = `<p class="empty">Error: ${esc(error.message)}</p>`; return; }
   renderInvites();

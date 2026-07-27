@@ -360,6 +360,25 @@ button { -webkit-user-select: none; user-select: none; }
 table.db thead th { box-shadow: inset 0 -1px 0 var(--line-2); }
 table.db tbody tr:last-child td { border-bottom: none; }
 
+/* "Cargando…" late, para que se note que está trabajando y no colgado */
+.empty.cargando { animation: cargando 1.4s ease-in-out infinite; }
+@keyframes cargando { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+
+/* Táctil: sin ratón el :hover se queda pegado después de tocar (una fila
+   tocada seguía resaltada como si el dedo siguiera encima). */
+@media (hover: none) {
+  table.db tbody tr.row:hover { background: none; }
+  table.db tbody tr.row.open:hover { background: rgba(227, 189, 114, 0.14); }
+  .invite-grid .invite:hover { border-color: var(--line); transform: none; }
+  .nav-item:hover { background: none; color: var(--muted); }
+  .nav-item.active:hover { background: linear-gradient(135deg, var(--gold), var(--gold-dk)); color: #2a1410; }
+  .nav-install:hover { background: none; color: var(--gold); }
+  .btn-line:hover { background: rgba(255, 255, 255, 0.04); border-color: var(--line-2); }
+  .icon-btn:hover, .btn-save:hover, .btn-primary:hover { filter: none; }
+  .btn-del:hover { background: none; }
+  .modal-close:hover { background: none; color: var(--muted); }
+}
+
 /* Los modales entran, no aparecen de golpe */
 .modal-back { animation: modal-fade .18s ease-out; }
 .modal-back > .modal { animation: modal-rise .24s cubic-bezier(.22, .61, .36, 1); }
