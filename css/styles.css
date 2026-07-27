@@ -354,7 +354,7 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
    el mismo fondo claro que trae leaflet-draw de fábrica antes de invertir. */
 .leaflet-draw-toolbar a { background-color: #fff; filter: invert(1) brightness(1.7); }
 
-.places { list-style: none; margin-top: 14px; display: grid; gap: 10px; }
+.places { list-style: none; margin-top: 14px; display: grid; gap: 12px; }
 .place {
   display: flex;
   align-items: center;
@@ -386,7 +386,7 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   background: transparent;
   color: var(--gold);
   border-radius: 999px;
-  padding: 8px 15px;
+  padding: 10px 17px; min-height: 40px;
   font-family: var(--font-body);
   font-weight: 800;
   font-size: 0.82rem;
@@ -447,7 +447,7 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 .crear-note .inline-ico { color: var(--gold); }
 
 /* ---------- Fecha y hora de la cita ---------- */
-.cuando-box { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: clamp(6px, 1.6vh, 10px) 0 4px; }
+.cuando-box { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin: clamp(8px, 1.8vh, 14px) 0 6px; }
 .cuando-box label { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; font-weight: 700; color: var(--muted); }
 .cuando-box input {
   font-family: var(--font-body); font-weight: 600; font-size: 0.95rem; color: var(--ivory);
@@ -457,7 +457,7 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 .cuando-box input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(211, 176, 106, 0.16); }
 
 /* ---------- Mapa: buscador + área ---------- */
-.map-toolbar { display: flex; gap: 10px; align-items: flex-start; margin-bottom: clamp(6px, 1.4vh, 10px); }
+.map-toolbar { display: flex; gap: 12px; align-items: flex-start; margin-bottom: clamp(8px, 1.6vh, 12px); }
 .search-box { position: relative; flex: 1 1 auto; }
 .search-box .search-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted-2); pointer-events: none; }
 .search-box .search-ico .icon { width: 18px; height: 18px; }
@@ -475,7 +475,9 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 #geo-search::placeholder { color: var(--muted-2); }
 #geo-search:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(211, 176, 106, 0.16); }
 .search-results {
-  position: absolute; z-index: 500; top: calc(100% + 6px); left: 0; right: 0;
+  /* por encima de los controles de Leaflet (z-index 1000), que si no tapan
+     la lista de resultados con los botones de zoom y de dibujar área */
+  position: absolute; z-index: 1200; top: calc(100% + 8px); left: 0; right: 0;
   list-style: none; background: var(--panel-solid); border: 1px solid var(--line-2);
   border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; max-height: 260px; overflow-y: auto;
 }
@@ -495,7 +497,7 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 
 .map-help { text-align: center; color: var(--muted-2); font-weight: 600; font-size: 0.86rem; margin: clamp(6px, 1.6vh, 12px) 0 clamp(6px, 1.6vh, 14px); }
 .map-help b { color: var(--gold); }
-.map-actions { display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.map-actions { display: flex; gap: 18px; align-items: center; justify-content: center; flex-wrap: wrap; }
 .map-actions .link-back { margin-top: 0; }
 
 /* ---------- Responsive ----------
@@ -525,10 +527,10 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   .cuando-box label { flex: 1 1 140px; }
   .cuando-box input { width: 100%; }
   /* acciones del mapa: botón principal a lo ancho */
-  .map-actions { flex-direction: column; align-items: stretch; gap: 8px; }
+  .map-actions { flex-direction: column; align-items: stretch; gap: 12px; }
   .map-actions .btn-si { width: 100%; justify-content: center; }
   .place { flex-wrap: wrap; }
-  .place .pick { margin-left: auto; }
+  .place .pick { margin-left: auto; margin-top: 4px; }
   .badge-tilt { right: 12px; }
 }
 

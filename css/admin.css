@@ -194,7 +194,7 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 .editor input:focus, .editor textarea:focus, .editor select:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(216, 166, 87, 0.18); }
 .editor a { color: var(--gold); font-weight: 700; text-decoration: none; }
 .editor a:hover { text-decoration: underline; }
-.editor-actions { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; }
+.editor-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 4px; }
 
 /* ---------- Evaluación de la cita (5 estrellas, medias incluidas) ---------- */
 .rating { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -211,7 +211,7 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 /* ---------- Selector de foto (cita / invitación) ---------- */
 .foto-box { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .foto-preview { width: 110px; height: 110px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line-2); background: rgba(0, 0, 0, 0.3); }
-.foto-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.foto-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 .foto-pick { cursor: pointer; }
 .btn-save { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--gold), var(--gold-dk)); color: #2a1410; border: none; border-radius: 10px; padding: 11px 18px; font-weight: 800; }
 .btn-save:hover { filter: brightness(1.06); }
@@ -228,10 +228,11 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 .invite {
   background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px;
   overflow: hidden; display: flex; flex-direction: column;
-  cursor: pointer; transition: border-color .16s, transform .12s;
 }
-.invite:hover { border-color: var(--gold); transform: translateY(-2px); }
-.invite .url input { cursor: text; }
+/* Solo las fichas de la cuadrícula se pulsan (el modal reutiliza .url). */
+.invite-grid .invite { cursor: pointer; transition: border-color .16s, transform .12s; }
+.invite-grid .invite:hover { border-color: var(--gold); transform: translateY(-2px); }
+.invite-grid .invite .url input { cursor: text; }
 .invite-foto { position: relative; }
 .invite-foto .del-btn {
   position: absolute; top: 8px; right: 8px;
@@ -246,12 +247,12 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 .invite-who { min-width: 0; }
 .invite h4 { font-size: 1.05rem; margin-bottom: 2px; color: var(--text); }
 .invite .mote { color: var(--muted); font-size: 0.85rem; font-weight: 700; }
-.invite .url { display: flex; gap: 8px; align-items: center; }
-.invite .url input { flex: 1; min-width: 0; background: rgba(0, 0, 0, 0.3); color: var(--muted); border: 1px solid var(--line-2); border-radius: 9px; padding: 8px 10px; font-size: 0.8rem; font-family: var(--font); }
+.url { display: flex; gap: 10px; align-items: center; }
+.url input { flex: 1; min-width: 0; background: rgba(0, 0, 0, 0.3); color: var(--muted); border: 1px solid var(--line-2); border-radius: 9px; padding: 10px 12px; font-size: 0.8rem; font-family: var(--font); }
 .icon-btn { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 9px; background: linear-gradient(135deg, var(--gold), var(--gold-dk)); color: #2a1410; border: none; flex: 0 0 auto; transition: filter .16s, background .16s, color .16s; }
 .icon-btn:hover { filter: brightness(1.08); }
 .icon-btn .icon { width: 17px; height: 17px; }
-.del-btn { background: none; color: var(--danger); border: 1px solid rgba(226, 105, 95, .4); width: 34px; height: 34px; }
+.del-btn { background: none; color: var(--danger); border: 1px solid rgba(226, 105, 95, .4); width: 38px; height: 38px; }
 .del-btn:hover { background: rgba(226, 105, 95, 0.16); filter: none; }
 
 /* ---------- Botón flotante clip + modal ---------- */
@@ -270,6 +271,7 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
   display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 20px; backdrop-filter: blur(4px);
 }
 .modal {
+  position: relative;
   width: min(440px, 100%); max-width: 100%; background: var(--panel); border: 1px solid var(--line-2);
   border-radius: 20px; padding: 30px; box-shadow: 0 40px 90px rgba(0, 0, 0, 0.7);
   max-height: calc(100dvh - 40px); overflow-y: auto;
@@ -277,12 +279,18 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 .modal-cita { width: min(720px, 100%); }
 .modal-cita .editor { padding: 0; }
 .modal-cita .editor-actions { margin-top: 4px; }
-.modal h3 { font-family: var(--title); font-weight: 500; font-size: 1.5rem; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+.modal h3 { font-family: var(--title); font-weight: 500; font-size: 1.5rem; margin-bottom: 4px; padding-right: 40px; display: flex; align-items: center; gap: 10px; }
 .modal h3 [data-icon] { color: var(--gold); }
 .modal p.sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
 .modal .result { margin-top: 18px; }
-.modal-close { float: right; background: none; border: none; color: var(--muted); }
-.modal-close:hover { color: var(--text); }
+/* Absoluto y con su propio hueco reservado en el h3: flotando se pegaba al
+   título en cuanto este ocupaba dos líneas. */
+.modal-close {
+  position: absolute; top: 14px; right: 14px; z-index: 2;
+  display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px;
+  background: none; border: none; color: var(--muted); transition: background .16s, color .16s;
+}
+.modal-close:hover { background: rgba(255, 255, 255, 0.06); color: var(--text); }
 
 /* ---------- Responsive ---------- */
 /* Texto largo no desborda */
