@@ -14,18 +14,20 @@ let sortKey = 'created_at';
 let sortDir = 'desc';
 let openId = null;   // fila de cita expandida en la tabla
 
+/* movil: true = columna que sobrevive en pantallas estrechas. El resto se
+   oculta para no tener que hacer scroll lateral; el modal lo enseña todo. */
 const COLS = [
-  { k: 'foto',       label: '', sortable: false, cell: (r) => avatarHTML(r.foto_url, r.nombre) },
+  { k: 'foto',       label: '', sortable: false, movil: true, cell: (r) => avatarHTML(r.foto_url, r.nombre) },
   { k: 'created_at', label: 'Registrada', fmt: fechaHora },
   { k: 'categoria',  label: 'Tipo', fmt: fmtCategoria },
-  { k: 'fecha_cita', label: 'Cuándo', fmt: fechaHora },
-  { k: 'nombre',     label: 'Nombre' },
+  { k: 'fecha_cita', label: 'Cuándo', movil: true, fmt: fechaHora },
+  { k: 'nombre',     label: 'Nombre', movil: true },
   { k: 'plan',       label: 'Vamos a' },
   { k: 'antojo',     label: 'Me apetece' },
   { k: 'franja',     label: 'Horario' },
   { k: 'ubicacion',  label: 'Ubicación' },
   { k: 'sitio',      label: 'Sitio' },
-  { k: 'nota',       label: 'Nota', fmt: fmtNota },
+  { k: 'nota',       label: 'Nota', movil: true, fmt: fmtNota },
 ];
 
 /* ---------- helpers ---------- */
@@ -318,9 +320,10 @@ function filtradas() {
 function renderCitas() {
   const thead = document.getElementById('thead');
   thead.innerHTML = '<tr>' + COLS.map((c) => {
-    if (c.sortable === false) return `<th class="col-${c.k} no-sort">${c.label}</th>`;
+    const cls = `col-${c.k}${c.movil ? ' m' : ''}`;
+    if (c.sortable === false) return `<th class="${cls} no-sort">${c.label}</th>`;
     const arrow = c.k === sortKey ? (sortDir === 'asc' ? '▲' : '▼') : '↕';
-    return `<th class="col-${c.k}" data-key="${c.k}">${c.label} <span class="arrow">${arrow}</span></th>`;
+    return `<th class="${cls}" data-key="${c.k}">${c.label} <span class="arrow">${arrow}</span></th>`;
   }).join('') + '</tr>';
   thead.querySelectorAll('th[data-key]').forEach((th) => th.addEventListener('click', () => {
     const k = th.dataset.key;
@@ -344,7 +347,7 @@ function renderCitas() {
     tr.className = 'row' + (r.id === openId ? ' open' : '');
     tr.innerHTML = COLS.map((c) => {
       const contenido = c.cell ? c.cell(r) : c.fmt ? c.fmt(r[c.k]) : esc(r[c.k]) || '—';
-      return `<td class="col-${c.k}">${contenido}</td>`;
+      return `<td class="col-${c.k}${c.movil ? ' m' : ''}">${contenido}</td>`;
     }).join('');
     tr.addEventListener('click', () => abrirModalCita(r));
     tbody.appendChild(tr);
@@ -382,7 +385,9 @@ function editorHTML(r) {
       </div>
       <div><div class="lbl">Categoría</div><div class="val">${fmtCategoria(r.categoria)}</div></div>
       <div><div class="lbl">Contacto</div><div class="val">${esc(r.contacto) || '<span style="color:var(--muted)">— (solo landing)</span>'}</div></div>
+      <div><div class="lbl">Registrada</div><div class="val">${r.created_at ? fechaHora(r.created_at) : '—'}</div></div>
       <div><div class="lbl">Cuándo (cita)</div><div class="val">${r.fecha_cita ? fechaHora(r.fecha_cita) : '—'}</div></div>
+      <div><div class="lbl">Horario</div><div class="val">${esc(r.franja) || '—'}</div></div>
       <div><div class="lbl">Salimos</div><div class="val">${esc(r.salimos) || '—'}</div></div>
       <div><div class="lbl">Plan</div><div class="val">${esc(r.plan) || '—'} · ${esc(r.antojo) || '—'}</div></div>
       <div><div class="lbl">Sitio</div><div class="val">${esc(r.sitio) || '—'} ${sitioLink ? '&nbsp; ' + sitioLink : ''} ${webLink ? '&nbsp; ' + webLink : ''}</div></div>

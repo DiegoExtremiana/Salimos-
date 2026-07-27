@@ -342,6 +342,22 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
   .sidebar, .nav-scrim, .nav-toggle i { transition-duration: .01ms; }
 }
 
+/* Pantallas estrechas: la tabla se queda con lo imprescindible (las columnas
+   marcadas .m) y deja de hacer scroll horizontal. El resto de los datos se ve
+   al pulsar la fila, en el modal. */
+@media (max-width: 640px) {
+  .table-wrap { overflow-x: hidden; }
+  table.db { min-width: 0; table-layout: fixed; }
+  table.db th:not(.m), table.db td:not(.m) { display: none; }
+  table.db th, table.db td { padding: 10px 8px; font-size: 0.82rem; }
+  table.db th.col-foto, table.db td.col-foto { width: 40px; }
+  table.db th.col-fecha_cita, table.db td.col-fecha_cita { width: 5.6em; white-space: normal; }
+  table.db th.col-nota, table.db td.col-nota { width: 3.6em; }
+  table.db td.col-nombre { white-space: normal; overflow-wrap: anywhere; font-weight: 700; }
+  table.db td.col-foto .avatar { width: 32px; height: 32px; border-radius: 9px; font-size: 0.82rem; }
+  .badge-nota { padding: 3px 7px; font-size: 0.74rem; }
+}
+
 /* Móvil */
 @media (max-width: 520px) {
   .main { padding: 68px 14px 92px; }         /* hueco para la hamburguesa y el FAB */
@@ -350,8 +366,7 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
   .controls { gap: 10px; }
   .searchbar { flex: 1 1 100%; }
   .controls .perpage { margin-left: auto; }
-  table.db { font-size: 0.84rem; }
-  table.db th, table.db td { padding: 10px 12px; }
+  table.db th, table.db td { padding: 9px 7px; font-size: 0.8rem; }
   .editor { grid-template-columns: 1fr; padding: 16px; gap: 14px; }
   .editor-actions { flex-wrap: wrap; }
   .invite-grid { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 12px; }
