@@ -17,22 +17,24 @@ let invites = [];          // invitaciones cargadas (también para las fotos de 
 const invitesById = new Map();
 let inviteAbierta = null;  // invitación cuya foto se está editando
 
-/* movil: true = columna que sobrevive en pantallas estrechas. El resto se
-   oculta para no tener que hacer scroll lateral; el modal lo enseña todo. */
+/* La tabla se reduce en dos escalones para no hacer nunca scroll lateral:
+   medio (≤900px, el panel ya va en una columna) y movil (≤640px, solo lo
+   vital). Lo que se cae sigue estando entero en el modal de la cita. */
 const COLS = [
-  { k: 'foto',       label: '', sortable: false, movil: true, cell: (r) => avatarHTML(fotoPersona(r), r.nombre) },
+  { k: 'foto',       label: '', sortable: false, medio: true, movil: true, cell: (r) => avatarHTML(fotoPersona(r), r.nombre) },
   { k: 'created_at', label: 'Registrada', fmt: fechaHora },
-  { k: 'categoria',  label: 'Tipo', fmt: fmtCategoria },
-  { k: 'fecha_cita', label: 'Cuándo', movil: true, fmt: fechaHora },
-  { k: 'nombre',     label: 'Nombre', movil: true,
+  { k: 'categoria',  label: 'Tipo', medio: true, fmt: fmtCategoria },
+  { k: 'fecha_cita', label: 'Cuándo', medio: true, movil: true, fmt: fechaHora },
+  { k: 'nombre',     label: 'Nombre', medio: true, movil: true,
     cell: (r) => `${esc(r.nombre) || '—'}${r.mote ? `<span class="cell-mote">${esc(r.mote)}</span>` : ''}` },
-  { k: 'plan',       label: 'Vamos a' },
+  { k: 'plan',       label: 'Vamos a', medio: true },
   { k: 'antojo',     label: 'Me apetece' },
   { k: 'franja',     label: 'Horario' },
   { k: 'ubicacion',  label: 'Ubicación' },
-  { k: 'sitio',      label: 'Sitio' },
-  { k: 'nota',       label: 'Nota', movil: true, fmt: fmtNota },
+  { k: 'sitio',      label: 'Sitio', medio: true },
+  { k: 'nota',       label: 'Nota', medio: true, movil: true, fmt: fmtNota },
 ];
+function colClase(c) { return `col-${c.k}${c.medio ? ' t' : ''}${c.movil ? ' m' : ''}`; }
 
 /* ---------- helpers ---------- */
 function pintarIconos(raiz = document) {
@@ -331,7 +333,7 @@ function filtradas() {
 function renderCitas() {
   const thead = document.getElementById('thead');
   thead.innerHTML = '<tr>' + COLS.map((c) => {
-    const cls = `col-${c.k}${c.movil ? ' m' : ''}`;
+    const cls = colClase(c);
     if (c.sortable === false) return `<th class="${cls} no-sort">${c.label}</th>`;
     const arrow = c.k === sortKey ? (sortDir === 'asc' ? '▲' : '▼') : '↕';
     return `<th class="${cls}" data-key="${c.k}">${c.label} <span class="arrow">${arrow}</span></th>`;
@@ -358,7 +360,7 @@ function renderCitas() {
     tr.className = 'row' + (r.id === openId ? ' open' : '');
     tr.innerHTML = COLS.map((c) => {
       const contenido = c.cell ? c.cell(r) : c.fmt ? c.fmt(r[c.k]) : esc(r[c.k]) || '—';
-      return `<td class="col-${c.k}${c.movil ? ' m' : ''}">${contenido}</td>`;
+      return `<td class="${colClase(c)}">${contenido}</td>`;
     }).join('');
     tr.addEventListener('click', () => abrirModalCita(r));
     tbody.appendChild(tr);

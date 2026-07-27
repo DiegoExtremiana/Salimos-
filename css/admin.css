@@ -104,7 +104,10 @@ button { font-family: var(--font); cursor: pointer; }
 /* Hamburguesa + velo: ocultos en escritorio, se activan en el media query */
 .nav-toggle, .nav-scrim { display: none; }
 
-.main { padding: clamp(18px, 3vw, 34px); overflow: hidden; height: 100%; min-height: 0; }
+/* min-width: 0 para que la columna del grid pueda encogerse por debajo del
+   ancho mínimo de la tabla; si no, el panel se sale de la ventana y como el
+   body no hace scroll, lo que sobra queda recortado e inalcanzable. */
+.main { padding: clamp(18px, 3vw, 34px); overflow: hidden; height: 100%; min-height: 0; min-width: 0; }
 .main > section { height: 100%; display: flex; flex-direction: column; min-height: 0; }
 .topbar { flex-shrink: 0; display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
 .topbar h2 { font-family: var(--title); font-weight: 500; font-size: clamp(1.4rem, 3vw, 2rem); display: flex; align-items: center; gap: 10px; color: var(--text); }
@@ -336,7 +339,14 @@ table.db tbody tr:last-child td { border-bottom: none; }
 
 /* Tablet y móvil: el menú es un cajón vertical que entra y sale deslizándose */
 @media (max-width: 900px) {
-  .admin { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+  .admin { grid-template-columns: minmax(0, 1fr); grid-template-rows: 1fr; }
+
+  /* Con el panel ya en una sola columna no caben las once columnas: se
+     quedan las marcadas .t y la tabla deja de pedir 820px de ancho. */
+  table.db { min-width: 0; }
+  table.db th:not(.t), table.db td:not(.t) { display: none; }
+  table.db td.col-nombre, table.db td.col-sitio, table.db td.col-plan { white-space: normal; }
+  .searchbar { min-width: 0; }
 
   /* Botón hamburguesa, fijo sobre el contenido */
   .nav-toggle {
@@ -394,12 +404,11 @@ table.db tbody tr:last-child td { border-bottom: none; }
   .invite-grid .invite:hover { transform: none; }
 }
 
-/* Pantallas estrechas: la tabla se queda con lo imprescindible (las columnas
-   marcadas .m) y deja de hacer scroll horizontal. El resto de los datos se ve
-   al pulsar la fila, en el modal. */
+/* Móvil: solo los datos vitales (foto, nombre + mote, cuándo y nota). El
+   resto se ve al pulsar la fila, en el modal. */
 @media (max-width: 640px) {
   .table-wrap { overflow-x: hidden; }
-  table.db { min-width: 0; table-layout: fixed; }
+  table.db { table-layout: fixed; }
   table.db th:not(.m), table.db td:not(.m) { display: none; }
   table.db th, table.db td { padding: 10px 8px; font-size: 0.82rem; }
   table.db th.col-foto, table.db td.col-foto { width: 40px; }
