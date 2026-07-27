@@ -10,7 +10,7 @@
      NO se intercepta -> va directo a la red.
    ========================================================= */
 
-const CACHE = 'salimos-app-v12';
+const CACHE = 'salimos-app-v13';
 const ASSETS = [
   './',
   './index.html',

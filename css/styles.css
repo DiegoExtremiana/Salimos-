@@ -173,38 +173,45 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 }
 
 /* ---------- Polaroid ----------
-   La foto de quien invita, para que se le vea la cara antes de decir que sí.
-   Marco claro y girado, como una foto dejada encima de la mesa: es el único
-   trozo de luz de la tarjeta, así que atrae la vista sin romper el tono.
-   Se mide en vh además de en vw para que en pantallas bajas encoja en vez de
-   empujar la pregunta fuera de la tarjeta. */
+   La foto de quien invita: pequeña, en la esquina de abajo a la derecha y
+   girada, como si asomara por detrás de la tarjeta. Va POR ENCIMA y fuera
+   del flujo, así que no empuja nada ni se mete en medio de nada.
+   Asoma hacia abajo, nunca hacia arriba: lo que sobresale por debajo se
+   alcanza con el scroll, mientras que por arriba quedaría recortado cuando
+   la tarjeta llena la pantalla. Y a lo ancho se queda dentro, que si no el
+   canto se corta contra el borde del móvil.
+   Solo pisa el margen vacío de la esquina: los textos de esa zona van
+   centrados y cortos, y no llegan hasta ahí.
+   La posición vive en variables: cada tamaño de pantalla cambia un número,
+   no la fórmula entera. */
 .polaroid {
-  align-self: center;
-  width: clamp(104px, min(32vw, 20vh), 168px);
-  margin: 0 0 clamp(10px, 2.2vh, 20px);
-  padding: clamp(7px, 1.3vh, 11px);
-  background: linear-gradient(160deg, #fbf7ef, #e6dccb);
-  border-radius: 5px;
-  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  transform: rotate(-2.5deg);
+  --pol-y: 42%;
+  --pol-giro: 6deg;
+
+  position: absolute;
+  right: 12px;
+  bottom: 0;
+  z-index: 3;
+  width: clamp(62px, 8.5vh, 88px);
+  margin: 0;
+  padding: 4px 4px 11px;                 /* borde inferior más ancho: es una polaroid */
+  background: linear-gradient(158deg, var(--ivory), #cec3af);
+  border: 1px solid rgba(211, 176, 106, 0.35);
+  border-radius: 4px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6);
+  transform: translateY(var(--pol-y)) rotate(var(--pol-giro));
   transition: transform 0.4s cubic-bezier(.2,.7,.2,1), box-shadow 0.4s ease;
 }
-.polaroid:hover { transform: rotate(0.5deg) translateY(-5px) scale(1.03); box-shadow: 0 28px 60px rgba(0, 0, 0, 0.6); }
+/* Al pasar por encima se endereza un poco: solo el giro, que es el único
+   número igual en todos los tamaños (lo que asoma cambia con cada uno). */
+.polaroid:hover { --pol-giro: 2.5deg; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.66); }
 .polaroid img {
   display: block; width: 100%; height: auto;
-  aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 28%;
+  aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 26%;
   border-radius: 2px; background: #17120e;
-}
-.polaroid figcaption {
-  margin-top: clamp(7px, 1.4vh, 11px);
-  padding-bottom: clamp(5px, 1.2vh, 10px);
-  font-family: var(--font-title);
-  font-style: italic;
-  font-weight: 500;
-  font-size: clamp(0.7rem, 1.7vh, 0.84rem);
-  line-height: 1.2;
-  color: #6b5a41;
-  text-align: center;
+  /* Un punto de calidez: en crudo, los azules de la foto chirriaban con el
+     oro y el granate de todo lo demás. */
+  filter: saturate(0.88) contrast(1.04) sepia(0.1);
 }
 
 .eyebrow {
@@ -599,9 +606,11 @@ button, .option, .place .pick { -webkit-user-select: none; user-select: none; }
 /* Móvil */
 @media (max-width: 560px) {
   .card { padding: clamp(18px, min(6vw, 5vh), 34px); border-radius: 22px; }
-  /* En el móvil la tarjeta ya va justa de alto: la foto cede sitio a la
-     pregunta y al formulario, que es lo que hay que rellenar. */
-  .polaroid { width: clamp(94px, min(30vw, 17vh), 140px); margin-bottom: clamp(8px, 1.8vh, 14px); }
+  /* Menos sitio y textos que llegan más a la derecha: encoge y asoma más,
+     para pisar solo el canto de la tarjeta. */
+  /* Menos sitio, y textos que llegan más a la derecha: encoge y asoma más,
+     para que lo que pisa de la tarjeta quepa en su margen inferior. */
+  .polaroid { --pol-y: 80%; right: 6px; width: clamp(48px, 7vh, 64px); }
   .card-wide { text-align: center; }
   .card-wide > .badge, .card-wide > .link-back { align-self: center; }
   .ask { font-size: clamp(2rem, min(15vw, 9vh), 4rem); }
@@ -645,8 +654,9 @@ button, .option, .place .pick { -webkit-user-select: none; user-select: none; }
 }
 @media (max-height: 560px) {
   .footer-note, .hint { display: none; }
-  .polaroid { width: clamp(84px, 15vh, 120px); }
-  .polaroid figcaption { display: none; }
+  /* Pantalla baja: la tarjeta llena el alto y los márgenes se estrechan, así
+     que la foto encoge y pisa aún menos esquina. */
+  .polaroid { --pol-y: 75%; width: clamp(46px, 8vh, 62px); }
   .badge:not(.badge-tilt) { display: none; }
   .option .tiny { display: none; }
   .map { height: clamp(80px, 20vh, 300px); }
@@ -686,7 +696,7 @@ button, .option, .place .pick { -webkit-user-select: none; user-select: none; }
   .btn-si:hover { filter: none; box-shadow: var(--glow-gold); transform: none; }
   .place:hover { border-color: var(--line); box-shadow: none; }
   .place .pick:hover { background: transparent; color: var(--gold); box-shadow: none; }
-  .polaroid:hover { transform: rotate(-2.5deg); box-shadow: 0 20px 44px rgba(0, 0, 0, 0.55); }
+  .polaroid:hover { --pol-giro: 6deg; box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6); }
   .link-back:hover { color: var(--muted-2); }
   .search-results li:hover { background: transparent; color: var(--ivory-soft); }
   .btn-ghost:hover { border-color: var(--line-2); box-shadow: none; }
@@ -695,5 +705,5 @@ button, .option, .place .pick { -webkit-user-select: none; user-select: none; }
 @media (prefers-reduced-motion: reduce) {
   .screen, .btn, .option, .heart, .splash-mark, .loading-msg, .btn-ghost, .place, .polaroid { transition: none; animation: none; }
   .place .pick:active, .btn-ghost:active { transform: none; }
-  .polaroid:hover { transform: rotate(-2.5deg); }
+  .polaroid:hover { --pol-giro: 6deg; }
 }
