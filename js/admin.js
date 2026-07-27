@@ -12,12 +12,15 @@ let token = localStorage.getItem(TOKEN_KEY) || null;
 let rows = [];
 let sortKey = 'created_at';
 let sortDir = 'desc';
-let openId = null;   // fila de cita expandida en la tabla
+let openId = null;         // fila de cita expandida en la tabla
+let invites = [];          // invitaciones cargadas (también para las fotos de la tabla)
+const invitesById = new Map();
+let inviteAbierta = null;  // invitación cuya foto se está editando
 
 /* movil: true = columna que sobrevive en pantallas estrechas. El resto se
    oculta para no tener que hacer scroll lateral; el modal lo enseña todo. */
 const COLS = [
-  { k: 'foto',       label: '', sortable: false, movil: true, cell: (r) => avatarHTML(r.foto_url, r.nombre) },
+  { k: 'foto',       label: '', sortable: false, movil: true, cell: (r) => avatarHTML(fotoPersona(r), r.nombre) },
   { k: 'created_at', label: 'Registrada', fmt: fechaHora },
   { k: 'categoria',  label: 'Tipo', fmt: fmtCategoria },
   { k: 'fecha_cita', label: 'Cuándo', movil: true, fmt: fechaHora },
@@ -50,6 +53,12 @@ function fechaHora(iso) {
 function fmtNota(v) {
   if (v == null || v === '') return '<span class="badge-nota empty">— /10</span>';
   return `<span class="badge-nota">${v}/10</span>`;
+}
+/* Foto con la que se reconoce una cita: la de la invitación, que es la de la
+   persona con la que saliste, y si no la hay la foto de la propia cita. */
+function fotoPersona(r) {
+  const inv = r.invitacion_id ? invitesById.get(r.invitacion_id) : null;
+  return (inv && inv.foto_url) || r.foto_url || null;
 }
 /* Miniatura reconocible: la foto si la hay, y si no la inicial del nombre. */
 function avatarHTML(url, nombre, cls = 'avatar') {
@@ -291,6 +300,7 @@ function setView(view) {
 async function loadCitas() {
   const tbody = document.getElementById('tbody');
   tbody.innerHTML = '<tr><td class="empty">Cargando…</td></tr>';
+  await cargarInvitaciones();   // sus fotos son las que salen en la tabla
   const { data, error } = await window.sb.rpc('admin_citas', { p_token: token });
   if (error) {
     if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
@@ -377,7 +387,7 @@ function editorHTML(r) {
   return `
     <div class="editor">
       <div class="full cita-hero">
-        ${avatarHTML(r.foto_url, r.nombre, 'avatar avatar-lg')}
+        ${avatarHTML(fotoPersona(r), r.nombre, 'avatar avatar-lg')}
         <div class="cita-hero-who">
           <h4>${esc(r.nombre) || 'Sin nombre'}</h4>
           <div class="mote">${esc(r.mote) || 'sin mote'}</div>
@@ -461,20 +471,37 @@ async function borrarCita(id) {
 /* ---------- INVITACIONES ---------- */
 function urlInvitacion(slug) { return new URL('../?i=' + slug, location.href).href; }
 
+/* Solo los datos: la tabla de citas también las necesita, aunque la vista de
+   invitaciones no esté abierta. */
+async function cargarInvitaciones() {
+  const { data, error } = await window.sb.rpc('admin_invitaciones', { p_token: token });
+  if (error) {
+    if (/no_autorizado/.test(error.message || '')) sesionCaducada();
+    return error;
+  }
+  invites = data || [];
+  invitesById.clear();
+  invites.forEach((inv) => invitesById.set(inv.id, inv));
+  return null;
+}
+
 async function loadInvites() {
   const cont = document.getElementById('invite-list');
   cont.innerHTML = '<p class="empty">Cargando…</p>';
-  const { data, error } = await window.sb.rpc('admin_invitaciones', { p_token: token });
-  if (error) {
-    if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
-    cont.innerHTML = `<p class="empty">Error: ${esc(error.message)}</p>`; return;
-  }
-  if (!data || !data.length) { cont.innerHTML = '<p class="empty">Aún no hay invitaciones. Crea una con el clip 📎</p>'; return; }
+  const error = await cargarInvitaciones();
+  if (error) { cont.innerHTML = `<p class="empty">Error: ${esc(error.message)}</p>`; return; }
+  renderInvites();
+}
+
+function renderInvites() {
+  const cont = document.getElementById('invite-list');
+  if (!invites.length) { cont.innerHTML = '<p class="empty">Aún no hay invitaciones. Crea una con el clip 📎</p>'; return; }
   cont.innerHTML = '';
-  data.forEach((inv) => {
+  invites.forEach((inv) => {
     const url = urlInvitacion(inv.slug);
     const div = document.createElement('div');
     div.className = 'invite';
+    div.title = 'Pulsa para poner o cambiar su foto';
     div.innerHTML =
       `<div class="invite-foto">` +
         avatarHTML(inv.foto_url, inv.nombre, 'avatar invite-avatar') +
@@ -484,10 +511,44 @@ async function loadInvites() {
         `<div class="invite-who"><h4>${esc(inv.nombre)}</h4><div class="mote">${esc(inv.mote) || 'sin mote'}</div></div>` +
         `<div class="url"><input type="text" readonly value="${escAttr(url)}" /><button class="icon-btn copy-btn" title="Copiar">${window.svgIcon('copy', 'icon')}</button></div>` +
       `</div>`;
-    div.querySelector('.copy-btn').addEventListener('click', () => copiar(url, div.querySelector('.copy-btn')));
-    div.querySelector('.del-btn').addEventListener('click', () => borrarInvitacion(inv.id, inv.nombre));
+    div.addEventListener('click', () => abrirModalInvite(inv));
+    div.querySelector('.copy-btn').addEventListener('click', (e) => { e.stopPropagation(); copiar(url, div.querySelector('.copy-btn')); });
+    div.querySelector('.del-btn').addEventListener('click', (e) => { e.stopPropagation(); borrarInvitacion(inv.id, inv.nombre); });
+    div.querySelector('.url input').addEventListener('click', (e) => e.stopPropagation());
     cont.appendChild(div);
   });
+}
+
+/* ---------- modal: foto de la invitación (se puede poner después de
+   mandarla; es la foto de la persona y manda en la tabla de citas) ---------- */
+function abrirModalInvite(inv) {
+  inviteAbierta = inv;
+  document.getElementById('modal-invite-who').textContent = inv.mote ? `${inv.nombre} · ${inv.mote}` : inv.nombre;
+  const body = document.getElementById('modal-invite-body');
+  body.innerHTML = fotoPickerHTML('inv-edit', inv.foto_url);
+  pintarIconos(body);
+  wireFotoPicker('inv-edit');
+  document.getElementById('inv-msg').textContent = '';
+  document.getElementById('modal-invite').hidden = false;
+}
+function cerrarModalInvite() {
+  document.getElementById('modal-invite').hidden = true;
+  inviteAbierta = null;
+}
+
+async function guardarFotoInvitacion() {
+  if (!inviteAbierta) return;
+  const msg = document.getElementById('inv-msg');
+  const p_foto_url = fotoActual('inv-edit');
+  const { error } = await window.sb.rpc('admin_actualizar_invitacion', { p_token: token, p_id: inviteAbierta.id, p_foto_url });
+  if (error) {
+    if (/no_autorizado/.test(error.message || '')) { sesionCaducada(); return; }
+    msg.style.color = '#ef4444'; msg.textContent = 'Error al guardar.'; return;
+  }
+  inviteAbierta.foto_url = p_foto_url;   // mismo objeto que hay en invites/invitesById
+  msg.style.color = ''; msg.textContent = 'Guardado ✓';
+  renderInvites();
+  renderCitas();                          // la cara de esas citas cambia
 }
 
 async function borrarInvitacion(id, nombre) {
@@ -559,11 +620,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('invite-form').addEventListener('submit', crearInvitacion);
   document.getElementById('copy-url').addEventListener('click', () => copiar(document.getElementById('invite-url').value, document.getElementById('copy-url')));
 
+  document.getElementById('modal-invite-close').addEventListener('click', cerrarModalInvite);
+  document.getElementById('modal-invite').addEventListener('click', (e) => { if (e.target.id === 'modal-invite') cerrarModalInvite(); });
+  document.getElementById('inv-save').addEventListener('click', guardarFotoInvitacion);
+
   document.getElementById('modal-cita-close').addEventListener('click', cerrarModalCita);
   document.getElementById('modal-cita').addEventListener('click', (e) => { if (e.target.id === 'modal-cita') cerrarModalCita(); });
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     if (!document.getElementById('modal-cita').hidden) cerrarModalCita();
+    else if (!document.getElementById('modal-invite').hidden) cerrarModalInvite();
     else if (!document.getElementById('modal').hidden) cerrarModal();
     else if (navAbierto()) setNav(false);
   });

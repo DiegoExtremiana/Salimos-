@@ -227,7 +227,10 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 .invite {
   background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px;
   overflow: hidden; display: flex; flex-direction: column;
+  cursor: pointer; transition: border-color .16s, transform .12s;
 }
+.invite:hover { border-color: var(--gold); transform: translateY(-2px); }
+.invite .url input { cursor: text; }
 .invite-foto { position: relative; }
 .invite-foto .del-btn {
   position: absolute; top: 8px; right: 8px;

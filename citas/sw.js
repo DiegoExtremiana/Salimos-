@@ -5,7 +5,7 @@
    propios cache-first, y todo lo externo (Supabase) va directo a la red.
    ========================================================= */
 
-const CACHE = 'salimos-admin-v3';
+const CACHE = 'salimos-admin-v4';
 const ASSETS = [
   './',
   './index.html',
