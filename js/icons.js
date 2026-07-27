@@ -55,6 +55,7 @@ const ICON_PATHS = {
   target:    '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
   clip:      '<path d="M20 11.5 11 20.5a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8.5-8.5"/>',
   logout:    '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  download:  '<path d="M12 3v11M7.5 9.5 12 14l4.5-4.5M4.5 20h15"/>',
   edit:      '<path d="M4 20h4L19 9l-4-4L4 16zM14.5 5.5l4 4"/>',
   star:      '<path d="M12 3l2.5 5.6L20.5 9l-4.3 4.2 1 6-5.2-2.8L6.8 19.2l1-6L3.5 9l6-.4z"/>',
   copy:      '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>',

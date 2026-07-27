@@ -100,6 +100,10 @@ button { font-family: var(--font); cursor: pointer; }
 .nav-item:hover { background: rgba(227, 189, 114, 0.08); color: var(--text); }
 .nav-item.active { background: linear-gradient(135deg, var(--gold), var(--gold-dk)); color: #2a1410; }
 .sidebar .spacer { flex: 1; }
+/* Instalar la PWA solo tiene sentido en el móvil: en escritorio ni se ofrece
+   (el navegador ya tiene su propio botón en la barra de direcciones). */
+.nav-install { display: none; color: var(--gold); }
+.nav-install:hover { background: rgba(227, 189, 114, 0.12); color: var(--gold); }
 
 /* Hamburguesa + velo: ocultos en escritorio, se activan en el media query */
 .nav-toggle, .nav-scrim { display: none; }
@@ -394,6 +398,7 @@ table.db tbody tr:last-child td { border-bottom: none; }
   }
   .admin.nav-open .sidebar { transform: translateX(0); }
   .sidebar .logo { padding-left: 56px; }   /* hueco para la hamburguesa */
+  .nav-install { display: flex; }
 
   /* Velo oscuro tras el cajón */
   .nav-scrim {

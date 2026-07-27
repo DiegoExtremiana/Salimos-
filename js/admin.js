@@ -286,6 +286,14 @@ async function cerrarSesion() {
 
 function sesionCaducada() { token = null; localStorage.removeItem(TOKEN_KEY); showLogin(); }
 
+/* Ventana deslizante: cada vez que se entra con un token guardado se le
+   estira la caducidad, así el móvil no vuelve a pedir la contraseña mientras
+   se siga usando el panel. */
+async function renovarSesion() {
+  if (!token || !window.sb) return;
+  try { await window.sb.rpc('admin_renovar_sesion', { p_token: token }); } catch { /* si falla, la sesión sigue viva lo que le quedara */ }
+}
+
 /* ---------- navegación ---------- */
 /* Menú lateral en móvil: cajón deslizante */
 function setNav(abierto) {
@@ -640,15 +648,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     else if (navAbierto()) setNav(false);
   });
 
+  prepararInstalacion();
+
   // ¿Token guardado y válido?
   if (token && window.sb) {
     const { error } = await window.sb.rpc('admin_citas', { p_token: token });
-    if (!error) { showPanel(); return; }
+    if (!error) { renovarSesion(); showPanel(); return; }
   }
   showLogin();
 });
 
-/* ---------- PWA (instalable, pantalla completa) ---------- */
+/* ---------- PWA: instalar el panel en el móvil ----------
+   En Android/Chrome se usa el evento beforeinstallprompt. En iOS no existe
+   esa API, así que el botón se muestra igual y explica el camino a mano
+   (Compartir → Añadir a pantalla de inicio). */
+let promptInstalar = null;
+
+function enModoApp() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function botonInstalar() { return document.getElementById('btn-install'); }
+
+function prepararInstalacion() {
+  const btn = botonInstalar();
+  if (enModoApp()) return;          // ya está instalada: no hay nada que ofrecer
+  btn.hidden = false;               // el CSS decide que solo se vea en móvil
+  btn.addEventListener('click', instalarApp);
+}
+async function instalarApp() {
+  setNav(false);
+  if (promptInstalar) {
+    promptInstalar.prompt();
+    const { outcome } = await promptInstalar.userChoice;
+    promptInstalar = null;
+    if (outcome === 'accepted') botonInstalar().hidden = true;
+    return;
+  }
+  await avisar('Abre el menú de compartir del navegador y elige «Añadir a pantalla de inicio». El panel se abrirá como una app y la sesión seguirá guardada.',
+    { titulo: 'Instalar el panel', icono: 'download' });
+}
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  promptInstalar = e;
+  if (!enModoApp()) botonInstalar().hidden = false;
+});
+window.addEventListener('appinstalled', () => {
+  promptInstalar = null;
+  botonInstalar().hidden = true;
+});
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
