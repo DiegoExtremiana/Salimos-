@@ -292,6 +292,44 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 }
 .modal-close:hover { background: rgba(255, 255, 255, 0.06); color: var(--text); }
 
+/* ---------- Detalles finos ---------- */
+::selection { background: rgba(227, 189, 114, 0.3); color: var(--text); }
+body { -webkit-tap-highlight-color: transparent; }
+
+/* Foco: sin halo del navegador al pulsar con el ratón, pero bien visible
+   (y siempre igual) cuando se navega con teclado. */
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+button { -webkit-user-select: none; user-select: none; }
+.icon-btn, .btn-line, .btn-save, .btn-del, .btn-primary {
+  transition: filter .16s, background .16s, border-color .16s, color .16s, transform .1s;
+}
+.icon-btn:active, .btn-line:active, .btn-save:active, .btn-del:active, .btn-primary:active { transform: scale(0.97); }
+
+/* Barras de desplazamiento discretas, en vez de las grises del sistema */
+* { scrollbar-width: thin; scrollbar-color: rgba(227, 189, 114, 0.3) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(227, 189, 114, 0.24); border-radius: 999px;
+  border: 3px solid transparent; background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(227, 189, 114, 0.42); background-clip: content-box; }
+
+/* La cabecera de la tabla se despega del cuerpo al hacer scroll */
+table.db thead th { box-shadow: inset 0 -1px 0 var(--line-2); }
+table.db tbody tr:last-child td { border-bottom: none; }
+
+/* Los modales entran, no aparecen de golpe */
+.modal-back { animation: modal-fade .18s ease-out; }
+.modal-back > .modal { animation: modal-rise .24s cubic-bezier(.22, .61, .36, 1); }
+@keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-rise {
+  from { opacity: 0; transform: translateY(14px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+
 /* ---------- Responsive ---------- */
 /* Texto largo no desborda */
 .editor .val, .invite h4, .invite .mote { overflow-wrap: anywhere; }
@@ -352,6 +390,8 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 
 @media (prefers-reduced-motion: reduce) {
   .sidebar, .nav-scrim, .nav-toggle i { transition-duration: .01ms; }
+  .modal-back, .modal-back > .modal { animation: none; }
+  .invite-grid .invite:hover { transform: none; }
 }
 
 /* Pantallas estrechas: la tabla se queda con lo imprescindible (las columnas

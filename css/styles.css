@@ -500,6 +500,29 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 .map-actions { display: flex; gap: 18px; align-items: center; justify-content: center; flex-wrap: wrap; }
 .map-actions .link-back { margin-top: 0; }
 
+/* ---------- Detalles finos ---------- */
+::selection { background: rgba(211, 176, 106, 0.28); color: var(--ivory); }
+body { -webkit-tap-highlight-color: transparent; }
+
+/* Foco: sin halo del navegador al pulsar con el ratón, pero bien visible
+   (y siempre igual) cuando se navega con teclado. */
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+button, .option, .place .pick { -webkit-user-select: none; user-select: none; }
+.place .pick:active, .btn-ghost:active { transform: scale(0.96); }
+.btn-ghost { transition: background .18s, color .18s, border-color .18s, box-shadow .2s, transform .1s; }
+
+/* Barras de desplazamiento discretas, en vez de las grises del sistema */
+* { scrollbar-width: thin; scrollbar-color: rgba(211, 176, 106, 0.3) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(211, 176, 106, 0.24); border-radius: 999px;
+  border: 3px solid transparent; background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(211, 176, 106, 0.42); background-clip: content-box; }
+
 /* ---------- Responsive ----------
    Al final del archivo a propósito: así estas reglas siempre ganan la
    cascada frente a cualquier regla base de arriba, sea cual sea su selector. */
@@ -582,5 +605,6 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .screen, .btn, .option, .heart, .splash-mark, .loading-msg { transition: none; animation: none; }
+  .screen, .btn, .option, .heart, .splash-mark, .loading-msg, .btn-ghost, .place { transition: none; animation: none; }
+  .place .pick:active, .btn-ghost:active { transform: none; }
 }
