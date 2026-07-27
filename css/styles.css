@@ -172,6 +172,41 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   box-shadow: var(--shadow);
 }
 
+/* ---------- Polaroid ----------
+   La foto de quien invita, para que se le vea la cara antes de decir que sí.
+   Marco claro y girado, como una foto dejada encima de la mesa: es el único
+   trozo de luz de la tarjeta, así que atrae la vista sin romper el tono.
+   Se mide en vh además de en vw para que en pantallas bajas encoja en vez de
+   empujar la pregunta fuera de la tarjeta. */
+.polaroid {
+  align-self: center;
+  width: clamp(104px, min(32vw, 20vh), 168px);
+  margin: 0 0 clamp(10px, 2.2vh, 20px);
+  padding: clamp(7px, 1.3vh, 11px);
+  background: linear-gradient(160deg, #fbf7ef, #e6dccb);
+  border-radius: 5px;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transform: rotate(-2.5deg);
+  transition: transform 0.4s cubic-bezier(.2,.7,.2,1), box-shadow 0.4s ease;
+}
+.polaroid:hover { transform: rotate(0.5deg) translateY(-5px) scale(1.03); box-shadow: 0 28px 60px rgba(0, 0, 0, 0.6); }
+.polaroid img {
+  display: block; width: 100%; height: auto;
+  aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 28%;
+  border-radius: 2px; background: #17120e;
+}
+.polaroid figcaption {
+  margin-top: clamp(7px, 1.4vh, 11px);
+  padding-bottom: clamp(5px, 1.2vh, 10px);
+  font-family: var(--font-title);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(0.7rem, 1.7vh, 0.84rem);
+  line-height: 1.2;
+  color: #6b5a41;
+  text-align: center;
+}
+
 .eyebrow {
   font-size: 0.76rem;
   font-weight: 700;
@@ -552,6 +587,9 @@ button, .option, .place .pick { -webkit-user-select: none; user-select: none; }
 /* Móvil */
 @media (max-width: 560px) {
   .card { padding: clamp(18px, min(6vw, 5vh), 34px); border-radius: 22px; }
+  /* En el móvil la tarjeta ya va justa de alto: la foto cede sitio a la
+     pregunta y al formulario, que es lo que hay que rellenar. */
+  .polaroid { width: clamp(94px, min(30vw, 17vh), 140px); margin-bottom: clamp(8px, 1.8vh, 14px); }
   .card-wide { text-align: center; }
   .card-wide > .badge, .card-wide > .link-back { align-self: center; }
   .ask { font-size: clamp(2rem, min(15vw, 9vh), 4rem); }
@@ -595,6 +633,8 @@ button, .option, .place .pick { -webkit-user-select: none; user-select: none; }
 }
 @media (max-height: 560px) {
   .footer-note, .hint { display: none; }
+  .polaroid { width: clamp(84px, 15vh, 120px); }
+  .polaroid figcaption { display: none; }
   .badge:not(.badge-tilt) { display: none; }
   .option .tiny { display: none; }
   .map { height: clamp(80px, 20vh, 300px); }
@@ -607,6 +647,8 @@ button, .option, .place .pick { -webkit-user-select: none; user-select: none; }
 }
 @media (max-height: 420px) {
   .eyebrow { display: none; }
+  /* Sin alto para la foto: antes está que se lea la pregunta y quepa el formulario */
+  .polaroid { display: none; }
   .btn { padding: 11px 26px; }
   .crear-form { gap: 8px; }
   .crear-form input { padding: 10px 14px; }
@@ -621,6 +663,7 @@ button, .option, .place .pick { -webkit-user-select: none; user-select: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .screen, .btn, .option, .heart, .splash-mark, .loading-msg, .btn-ghost, .place { transition: none; animation: none; }
+  .screen, .btn, .option, .heart, .splash-mark, .loading-msg, .btn-ghost, .place, .polaroid { transition: none; animation: none; }
   .place .pick:active, .btn-ghost:active { transform: none; }
+  .polaroid:hover { transform: rotate(-2.5deg); }
 }
