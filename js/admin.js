@@ -69,6 +69,14 @@ function avatarHTML(url, nombre, cls = 'avatar') {
   const inicial = (String(nombre || '').trim()[0] || '?').toUpperCase();
   return `<span class="${cls} avatar-ph">${esc(inicial)}</span>`;
 }
+/* Contacto: si dejó su Instagram, se abre su perfil desde aquí (es también
+   de donde salió la foto con la que se le reconoce en la tabla). */
+function contactoHTML(contacto) {
+  if (!contacto) return '<span class="dim">— (solo landing)</span>';
+  const usuario = window.usuarioInstagram ? window.usuarioInstagram(contacto) : null;
+  if (!usuario) return esc(contacto);
+  return `<a href="${escAttr(window.urlPerfilInstagram(usuario))}" target="_blank" rel="noopener">@${esc(usuario)}</a>`;
+}
 function fmtCategoria(v) {
   if (v === 'pedida_por_mi') return '<span class="cat cat-mi">La pedí yo</span>';
   if (v === 'pedida_a_mi') return '<span class="cat cat-ellos">Me la pidieron</span>';
@@ -422,7 +430,7 @@ function editorHTML(r) {
       ${campo('Me apetece', esc(r.antojo) || '—')}
       ${campo('Registrada', r.created_at ? fechaHora(r.created_at) : '—')}
       ${campo('Salimos', esc(r.salimos) || '—')}
-      ${campo('Contacto', esc(r.contacto) || '<span class="dim">— (solo landing)</span>', 'c2')}
+      ${campo('Contacto', contactoHTML(r.contacto), 'c2')}
       ${campo('Sitio', `${esc(r.sitio) || '—'}${sitioLink ? ' &nbsp; ' + sitioLink : ''}${webLink ? ' &nbsp; ' + webLink : ''}`, 'c2')}
       ${campo('Zona', `${zonaTexto}${zonaLink ? ' &nbsp; ' + zonaLink : ''}`, 'c2')}
       <div class="full">

@@ -77,12 +77,18 @@ barra del navegador (`display: standalone`).
 `fecha_cita` (día y hora de la cita, elegidos en el mapa), `nombre`, `mote`,
 `contacto_cif` (Instagram/teléfono **cifrado**, solo landing), `salimos`,
 `plan` (Vamos a), `tipo`, `franja` (horario), `antojo` (Me apetece), `sitio`,
-`ubicacion`, área marcada (`area_lat/lon/radio` o `area_bbox`), `nota` (/10) y
-`notas_admin`.
+`ubicacion`, área marcada (`area_lat/lon/radio` o `area_bbox`), `foto_url`,
+`nota` (/10) y `notas_admin`.
 
 El contacto se cifra con `pgp_sym_encrypt` (pgcrypto). La clave vive en la tabla
 `app_config` (se crea en `seed_admin.sql`, fuera del repo) y solo la usan las
 funciones del servidor; el panel lo muestra descifrado tras validar el token.
+
+Si el contacto es un **Instagram** (`@laura`, `instagram.com/laura`…), la app
+trae su **foto de perfil** y la guarda con la cita (`foto_url`), así el registro
+le pone cara sin subirla a mano. En el panel, el contacto es además un enlace a
+ese perfil. Si es un teléfono, o la cuenta no tiene foto pública, no se guarda
+nada. Ver [js/contacto.js](js/contacto.js).
 
 > La ubicación exacta se usa **solo en el navegador** para buscar sitios.
 > A la base de datos solo llega, como mucho, la **zona/ciudad** y el área que la
@@ -116,6 +122,9 @@ connection string **no** están en el repo ni deben estarlo.
    > (si quedaba una firma antigua sin `fecha_cita`, las respuestas no se
    > guardaban). Tras re-ejecutarlo, la cita se **guarda automáticamente** al
    > cerrarla. Añade también `admin_borrar_invitacion` (borrar invitaciones).
+   > Después, ejecuta en orden el resto de `supabase/migrations/` (`0002…`,
+   > `0003…`, `0004…`): son los añadidos posteriores (foto de la invitación,
+   > sesión de 180 días y foto de perfil del contacto).
 2. **Usuario admin + clave de cifrado** — ejecuta **una vez**
    `supabase/seed_admin.sql`: crea `Diego` (contraseña bcrypt) y genera la
    **clave de cifrado** del contacto en `app_config`. Ese archivo está en

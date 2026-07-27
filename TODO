@@ -1,18 +1,15 @@
 Salimos? ----
 
-- [revisar] Repasa los iconos SVG por unos más apropiados, si no eres capaz, usa iconos de flaticon.es/ o similares de:
-  . Pasear
-  . Bollería (ahora "Dulce")
-  . Shushi
-  . Hamburguesa
-  . Pizza
-  . Kebab
-  . Italiano
+- Desde movil la tabla se simplificará para no tener que hacer scroll horizontal, mostrará los datos vitales (foto, nombre, mote, fecha y nota) antes de clicar y que salga la ventana modal.
 
-- Las citas e invitaciones que tengan foto serán reconocibles en la tabla y ventana modal con su foto.
+- En la ventana modal desde movil los datos se reorganizarán en un orden organizado y aprovecharán el espacio, no será solo una columna y un scroll.
 
-- El menú de invitaciones será una cuadrícula.
+- En las ventanas modales y la página del mapa hay botones (como el "Buscar aquí") que se tocan con otros elementos o con cajas de inputs. Cada botón tendrá su espacio.
 
-- Desde movil la tabla se simplificará para no tener que hacer scroll horizontal, cuando se pulse la ventana modal se verán todos los datos
+- Pule detalles, sobre todo a nivel gráfico, para que la aplicación parezca profesional
 
-Al final de cada cambio, haz commit y confirma
+- Si una persona deja su Instagram, se cogerá la foto de su perfil en la base de datos.
+
+- Añade una foto en la página de inicio donde pone "¿Quieres tener una cita inolvidable?", la foto debe tener estética de polaroid y no debe descuadrar de el estilo de la página. La foto está en la raíz y se llama "user.png". Mueve la foto a donde tiene que estar y usala para que la persona que vaya a aceptar una cita me vea.
+
+Al final de cada cambio, haz commit y confirma y sincroniza

@@ -109,6 +109,16 @@ function revelarApp() {
   goTo('screen-salimos');
 }
 
+/* Foto de perfil de quien pide la cita. Se pide en cuanto deja su Instagram
+   —no al cerrar la cita— para que esté lista mucho antes de guardarla y no
+   haga esperar a nadie. Si no deja Instagram, se queda en null. */
+let fotoContacto = null;
+function pedirFotoDeContacto(contacto) {
+  fotoContacto = window.fotoDeInstagram
+    ? window.fotoDeInstagram(contacto).catch(() => null)
+    : null;
+}
+
 function setupBroma() {
   // "¿Quedamos?": alguien pide cita sin invitación
   const form = document.getElementById('crear-form');
@@ -120,6 +130,7 @@ function setupBroma() {
     cita.categoria = 'pedida_a_mi';     // me la piden a mí
     cita.nombre = nombre;
     cita.contacto = contacto;
+    pedirFotoDeContacto(contacto);
     revelarApp();
   });
 }
@@ -663,6 +674,13 @@ async function cerrarCita(place) {
   pintarIconos(done);
   lanzarCorazones();
 
+  // La foto de su Instagram se pidió al empezar; si aún viene en camino le
+  // damos un par de segundos y, si no llega, la cita se guarda igual sin ella.
+  const foto = await Promise.race([
+    Promise.resolve(fotoContacto).catch(() => null),
+    new Promise((r) => setTimeout(() => r(null), 2000)),
+  ]);
+
   const params = {
     p_invitacion_id: cita.invitacionId,
     p_categoria: cita.categoria || null,
@@ -683,6 +701,7 @@ async function cerrarCita(place) {
     p_area_lon: cita.area && cita.area.type === 'circle' ? cita.area.lon : null,
     p_area_radio: cita.area && cita.area.type === 'circle' ? cita.area.radio : null,
     p_area_bbox: cita.area && cita.area.type === 'rect' ? cita.area.bbox : null,
+    p_foto_url: foto,
   };
 
   const logEl = document.getElementById('done-log');
