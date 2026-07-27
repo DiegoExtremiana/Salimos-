@@ -218,18 +218,22 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 .editor input:focus, .editor textarea:focus, .editor select:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(216, 166, 87, 0.18); }
 .editor a { color: var(--gold); font-weight: 700; text-decoration: none; }
 .editor a:hover { text-decoration: underline; }
-.editor-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 4px; }
+.editor-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 4px; }
 
 /* ---------- Evaluación de la cita (5 estrellas, medias incluidas) ---------- */
-.rating { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.rating-stars { display: flex; gap: 2px; }
+.rating { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.rating-stars { display: flex; gap: 4px; }
 .rating-star { position: relative; width: 32px; height: 32px; padding: 2px; background: none; border: none; cursor: pointer; }
 .rating-star-bg, .rating-star-fg { position: absolute; inset: 2px; pointer-events: none; }
 .rating-star-bg svg, .rating-star-fg svg { width: 100%; height: 100%; display: block; }
 .rating-star-bg { color: var(--line-2); }
 .rating-star-fg { color: var(--gold); }
 .rating-value { font-weight: 800; color: var(--text); font-size: 0.92rem; min-width: 5.5em; }
-.rating-clear { background: none; border: none; color: var(--muted); font-size: 0.82rem; font-weight: 700; text-decoration: underline; cursor: pointer; }
+/* Pegado al 8/10 se pulsaba sin querer: se separa y tiene su propia zona. */
+.rating-clear {
+  background: none; border: none; color: var(--muted); font-size: 0.82rem; font-weight: 700;
+  text-decoration: underline; cursor: pointer; padding: 8px 10px; margin-left: 2px;
+}
 .rating-clear:hover { color: var(--text); }
 
 /* ---------- Selector de foto (cita / invitación) ---------- */
@@ -279,7 +283,7 @@ tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px soli
 .invite-who { min-width: 0; }
 .invite h4 { font-size: 1.05rem; margin-bottom: 2px; color: var(--text); }
 .invite .mote { color: var(--muted); font-size: 0.85rem; font-weight: 700; }
-.url { display: flex; gap: 10px; align-items: center; }
+.url { display: flex; gap: 12px; align-items: center; }
 .url input { flex: 1; min-width: 0; background: rgba(0, 0, 0, 0.3); color: var(--muted); border: 1px solid var(--line-2); border-radius: 9px; padding: 10px 12px; font-size: 0.8rem; font-family: var(--font); }
 .icon-btn { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 9px; background: linear-gradient(135deg, var(--gold), var(--gold-dk)); color: #2a1410; border: none; flex: 0 0 auto; transition: filter .16s, background .16s, color .16s; }
 .icon-btn:hover { filter: brightness(1.08); }
