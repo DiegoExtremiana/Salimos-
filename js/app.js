@@ -299,7 +299,10 @@ function renderMeals() {
 function prepararApetece(meal) {
   document.getElementById('apetece-eyebrow').textContent =
     meal.slot ? `${meal.slot.name} · ${meal.slot.start}–${meal.slot.end}` : meal.label;
-  document.getElementById('apetece-sub').textContent = meal.guasa;
+  // La coña del plan es un adorno y la pantalla puede no llevarla: si no está,
+  // se sigue. Antes petaba aquí y no llegaba a pintarse ningún antojo.
+  const sub = document.getElementById('apetece-sub');
+  if (sub) sub.textContent = meal.guasa;
   const cont = document.getElementById('cuisine-options');
   cont.innerHTML = '';
   meal.cocinas.forEach((c) => {
