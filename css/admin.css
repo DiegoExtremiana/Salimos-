@@ -160,6 +160,25 @@ table.db tbody tr.row.open { background: rgba(227, 189, 114, 0.14); }
 .cat-ellos { background: rgba(224, 162, 163, 0.18); color: var(--rose); }
 .cat-none { background: rgba(201, 169, 184, 0.12); color: var(--muted); }
 
+/* ---------- Avatares (foto de la cita / invitación) ---------- */
+.avatar {
+  display: block; width: 38px; height: 38px; border-radius: 10px; object-fit: cover;
+  border: 1px solid var(--line-2); background: rgba(0, 0, 0, 0.3); flex: 0 0 auto;
+}
+.avatar-ph {
+  display: grid; place-items: center; color: var(--muted);
+  font-weight: 800; font-size: 0.95rem; border-style: dashed;
+}
+.avatar-lg { width: 64px; height: 64px; border-radius: 14px; font-size: 1.5rem; }
+table.db th.col-foto, table.db td.col-foto { width: 38px; padding-right: 0; }
+table.db th.no-sort { cursor: default; }
+
+/* Cabecera del modal de cita: foto + quién */
+.cita-hero { display: flex; align-items: center; gap: 14px; }
+.cita-hero-who { min-width: 0; }
+.cita-hero h4 { font-family: var(--title); font-weight: 500; font-size: 1.25rem; color: var(--text); }
+.cita-hero .mote { color: var(--muted); font-weight: 700; font-size: 0.88rem; }
+
 /* fila expandida */
 tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px solid var(--line); }
 .editor { padding: 20px 22px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 22px; }

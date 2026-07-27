@@ -15,6 +15,7 @@ let sortDir = 'desc';
 let openId = null;   // fila de cita expandida en la tabla
 
 const COLS = [
+  { k: 'foto',       label: '', sortable: false, cell: (r) => avatarHTML(r.foto_url, r.nombre) },
   { k: 'created_at', label: 'Registrada', fmt: fechaHora },
   { k: 'categoria',  label: 'Tipo', fmt: fmtCategoria },
   { k: 'fecha_cita', label: 'Cuándo', fmt: fechaHora },
@@ -47,6 +48,12 @@ function fechaHora(iso) {
 function fmtNota(v) {
   if (v == null || v === '') return '<span class="badge-nota empty">— /10</span>';
   return `<span class="badge-nota">${v}/10</span>`;
+}
+/* Miniatura reconocible: la foto si la hay, y si no la inicial del nombre. */
+function avatarHTML(url, nombre, cls = 'avatar') {
+  if (url) return `<img class="${cls}" src="${escAttr(url)}" alt="" loading="lazy" />`;
+  const inicial = (String(nombre || '').trim()[0] || '?').toUpperCase();
+  return `<span class="${cls} avatar-ph">${esc(inicial)}</span>`;
 }
 function fmtCategoria(v) {
   if (v === 'pedida_por_mi') return '<span class="cat cat-mi">La pedí yo</span>';
@@ -311,10 +318,11 @@ function filtradas() {
 function renderCitas() {
   const thead = document.getElementById('thead');
   thead.innerHTML = '<tr>' + COLS.map((c) => {
+    if (c.sortable === false) return `<th class="col-${c.k} no-sort">${c.label}</th>`;
     const arrow = c.k === sortKey ? (sortDir === 'asc' ? '▲' : '▼') : '↕';
-    return `<th data-key="${c.k}">${c.label} <span class="arrow">${arrow}</span></th>`;
+    return `<th class="col-${c.k}" data-key="${c.k}">${c.label} <span class="arrow">${arrow}</span></th>`;
   }).join('') + '</tr>';
-  thead.querySelectorAll('th').forEach((th) => th.addEventListener('click', () => {
+  thead.querySelectorAll('th[data-key]').forEach((th) => th.addEventListener('click', () => {
     const k = th.dataset.key;
     if (sortKey === k) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
     else { sortKey = k; sortDir = 'asc'; }
@@ -334,7 +342,10 @@ function renderCitas() {
   shown.forEach((r) => {
     const tr = document.createElement('tr');
     tr.className = 'row' + (r.id === openId ? ' open' : '');
-    tr.innerHTML = COLS.map((c) => `<td>${c.fmt ? c.fmt(r[c.k]) : esc(r[c.k]) || '—'}</td>`).join('');
+    tr.innerHTML = COLS.map((c) => {
+      const contenido = c.cell ? c.cell(r) : c.fmt ? c.fmt(r[c.k]) : esc(r[c.k]) || '—';
+      return `<td class="col-${c.k}">${contenido}</td>`;
+    }).join('');
     tr.addEventListener('click', () => abrirModalCita(r));
     tbody.appendChild(tr);
   });
@@ -362,6 +373,13 @@ function editorHTML(r) {
 
   return `
     <div class="editor">
+      <div class="full cita-hero">
+        ${avatarHTML(r.foto_url, r.nombre, 'avatar avatar-lg')}
+        <div class="cita-hero-who">
+          <h4>${esc(r.nombre) || 'Sin nombre'}</h4>
+          <div class="mote">${esc(r.mote) || 'sin mote'}</div>
+        </div>
+      </div>
       <div><div class="lbl">Categoría</div><div class="val">${fmtCategoria(r.categoria)}</div></div>
       <div><div class="lbl">Contacto</div><div class="val">${esc(r.contacto) || '<span style="color:var(--muted)">— (solo landing)</span>'}</div></div>
       <div><div class="lbl">Cuándo (cita)</div><div class="val">${r.fecha_cita ? fechaHora(r.fecha_cita) : '—'}</div></div>
