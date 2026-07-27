@@ -147,6 +147,7 @@ function fotoPickerHTML(ns, urlActual) {
   return `
     <div class="foto-box">
       <img id="foto-preview-${ns}" class="foto-preview" src="${urlActual || ''}" ${tiene ? '' : 'hidden'} alt="" />
+      <div id="foto-vacia-${ns}" class="foto-vacia" ${tiene ? 'hidden' : ''} aria-hidden="true"><span data-icon="camera"></span></div>
       <div class="foto-actions">
         <label class="btn-line foto-pick">
           <span data-icon="camera"></span> <span id="foto-pick-label-${ns}">${tiene ? 'Cambiar foto' : 'Añadir foto'}</span>
@@ -167,6 +168,7 @@ function wireFotoPicker(ns) {
     try {
       preview.src = await leerFotoRedimensionada(file);
       preview.hidden = false;
+      document.getElementById(`foto-vacia-${ns}`).hidden = true;
       quitar.hidden = false;
       label.textContent = 'Cambiar foto';
     } catch { await avisar('No se pudo leer la imagen.'); }
@@ -176,6 +178,7 @@ function wireFotoPicker(ns) {
 function resetFotoPicker(ns) {
   document.getElementById(`foto-preview-${ns}`).src = '';
   document.getElementById(`foto-preview-${ns}`).hidden = true;
+  document.getElementById(`foto-vacia-${ns}`).hidden = false;
   document.getElementById(`foto-quitar-${ns}`).hidden = true;
   document.getElementById(`foto-pick-label-${ns}`).textContent = 'Añadir foto';
   document.getElementById(`foto-input-${ns}`).value = '';
