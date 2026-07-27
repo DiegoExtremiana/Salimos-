@@ -86,9 +86,17 @@ funciones del servidor; el panel lo muestra descifrado tras validar el token.
 
 Si el contacto es un **Instagram** (`@laura`, `instagram.com/laura`…), la app
 trae su **foto de perfil** y la guarda con la cita (`foto_url`), así el registro
-le pone cara sin subirla a mano. En el panel, el contacto es además un enlace a
-ese perfil. Si es un teléfono, o la cuenta no tiene foto pública, no se guarda
-nada. Ver [js/contacto.js](js/contacto.js).
+le pone cara sin subirla a mano. En el panel, el contacto es además un **enlace
+a ese perfil**. Si es un teléfono, o la cuenta no tiene foto pública, no se
+guarda nada. Ver [js/contacto.js](js/contacto.js).
+
+> **De dónde sale esa foto.** Instagram no la sirve al navegador (CORS) y
+> [unavatar](https://unavatar.io/) pasó su proveedor de Instagram a **plan de
+> pago**, así que hay que decirle a la app a qué origen pedirla: la plantilla
+> `avatarInstagram` de [js/config.js](js/config.js) (con `{usuario}` donde va la
+> cuenta). Debe responder la imagen con CORS abierto y `404` si no hay foto.
+> **Vacío** —como viene— la cita se guarda igual, solo que sin cara, y la foto
+> se puede poner a mano desde el panel con el enlace al perfil delante.
 
 > La ubicación exacta se usa **solo en el navegador** para buscar sitios.
 > A la base de datos solo llega, como mucho, la **zona/ciudad** y el área que la

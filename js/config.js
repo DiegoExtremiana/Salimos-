@@ -7,4 +7,14 @@
 window.SALIMOS_CONFIG = {
   supabaseUrl: 'https://fwdotxksqpyhsosdnbld.supabase.co',
   supabaseKey: 'sb_publishable_EwOOfmK6CHis0dGPTmxILA_Jqi22Qbk',
+
+  /* De dónde sale la foto de perfil de quien deja su Instagram al pedir cita.
+     Instagram no la sirve al navegador (CORS) y unavatar dejó su proveedor de
+     Instagram en plan de pago, así que hace falta un origen que sí responda:
+     pon aquí la plantilla, con {usuario} donde va la cuenta. Ejemplos:
+       'https://unavatar.io/instagram/{usuario}?fallback=false&key=TU_CLAVE'
+       'https://mi-endpoint.example/avatar/{usuario}'
+     Debe responder la imagen con CORS abierto y un 404 si no hay foto.
+     Vacío = no se busca ninguna foto (la cita se guarda igual, sin cara). */
+  avatarInstagram: '',
 };

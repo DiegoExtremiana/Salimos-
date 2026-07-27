@@ -22,11 +22,16 @@
 
   function urlPerfilInstagram(usuario) { return `https://www.instagram.com/${usuario}/`; }
 
-  /* Instagram no deja leer la foto de perfil desde el navegador, así que la
-     pedimos a unavatar, que resuelve el avatar público de la cuenta.
-     fallback=false: si la cuenta no existe o no tiene foto responde 404 y
-     preferimos no guardar nada antes que guardar un muñeco genérico. */
-  const AVATAR = 'https://unavatar.io/instagram/';
+  /* Instagram no sirve la foto de perfil al navegador (CORS), así que hace
+     falta un origen intermedio que sí la devuelva. Cuál es se configura en
+     js/config.js (avatarInstagram), porque el que valga hoy puede no valer
+     mañana: unavatar, por ejemplo, pasó su proveedor de Instagram a plan de
+     pago. Sin configurar, no se busca foto y la cita se guarda igual. */
+  function urlAvatar(usuario) {
+    const plantilla = (window.SALIMOS_CONFIG || {}).avatarInstagram;
+    if (!plantilla) return null;
+    return plantilla.replace('{usuario}', encodeURIComponent(usuario));
+  }
 
   function blobADataUrl(blob) {
     return new Promise((resolve, reject) => {
@@ -44,7 +49,8 @@
   async function fotoDeInstagram(contacto, { timeoutMs = 7000, maxBytes = 900000 } = {}) {
     const usuario = usuarioInstagram(contacto);
     if (!usuario) return null;
-    const url = `${AVATAR}${encodeURIComponent(usuario)}?fallback=false`;
+    const url = urlAvatar(usuario);
+    if (!url) return null;
     const control = new AbortController();
     const reloj = setTimeout(() => control.abort(), timeoutMs);
     try {
