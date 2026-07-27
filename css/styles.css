@@ -455,6 +455,10 @@ body.booting .stage { visibility: hidden; }  /* oculto hasta decidir pantalla */
   color-scheme: dark;
 }
 .cuando-box input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(211, 176, 106, 0.16); }
+.cuando-error {
+  text-align: center; color: var(--garnet-soft); font-weight: 700; font-size: 0.85rem;
+  margin: 2px 0 6px;
+}
 
 /* ---------- Mapa: buscador + área ---------- */
 .map-toolbar { display: flex; gap: 12px; align-items: flex-start; margin-bottom: clamp(8px, 1.6vh, 12px); }

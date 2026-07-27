@@ -311,6 +311,7 @@ function prepararResultado() {
   document.getElementById('results-wrap').hidden = true;
   document.getElementById('done').hidden = true;
   document.getElementById('places').innerHTML = '';
+  configurarCuando();
 
   setTimeout(iniciarMapa, 60);
 }
@@ -582,8 +583,62 @@ function pintarMapa(sitios, centro) {
   setTimeout(() => map.invalidateSize(), 80);
 }
 
+/* ========================= ¿Cuándo? (nunca en el pasado) =========================
+   Una cita se pide para más adelante, así que el día no puede ser anterior a
+   hoy y, si es hoy, la hora no puede haber pasado ya. El campo sigue siendo
+   opcional: sin día no hay nada que validar. */
+function ymdLocal(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function hmLocal(d) {
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+function cuandoEsPasado() {
+  const fecha = document.getElementById('cita-fecha').value;
+  if (!fecha) return false;
+  const hora = document.getElementById('cita-hora').value;
+  const ahora = new Date();
+  if (!hora) return fecha < ymdLocal(ahora);          // solo día: basta comparar el día
+  const d = new Date(`${fecha}T${hora}`);
+  if (isNaN(d)) return false;
+  return d.getTime() < ahora.getTime() - 60000;        // un minuto de margen
+}
+function avisoCuando(texto) {
+  const el = document.getElementById('cuando-error');
+  el.textContent = texto;
+  el.hidden = !texto;
+}
+/* Refresca los mínimos: se llama al entrar al paso del mapa, porque "hoy" y
+   "ahora" cambian si la pestaña se queda abierta. */
+function configurarCuando() {
+  document.getElementById('cita-fecha').min = ymdLocal(new Date());
+  validarCuando();
+}
+function validarCuando() {
+  const fechaInput = document.getElementById('cita-fecha');
+  const horaInput = document.getElementById('cita-hora');
+  const ahora = new Date();
+  const hoy = ymdLocal(ahora);
+  let aviso = '';
+
+  if (fechaInput.value && fechaInput.value < hoy) {
+    fechaInput.value = hoy;
+    aviso = 'Ese día ya pasó: lo he puesto en hoy.';
+  }
+  horaInput.min = fechaInput.value === hoy ? hmLocal(ahora) : '';
+  if (cuandoEsPasado()) aviso = 'Esa hora ya pasó. Elige una más tarde o cambia de día.';
+  avisoCuando(aviso);
+  return !cuandoEsPasado();
+}
+
 /* ========================= Cierre + guardado en Supabase ========================= */
 async function cerrarCita(place) {
+  // Puerta final: si el día u hora elegidos ya pasaron, no se cierra nada.
+  if (!validarCuando()) {
+    document.getElementById('cuando-error').scrollIntoView({ block: 'center', behavior: 'smooth' });
+    document.getElementById('cita-hora').focus();
+    return;
+  }
   const m = cita.meal, c = cita.cuisine;
   document.getElementById('map-stage').hidden = true;
   document.getElementById('results-wrap').hidden = true;
@@ -647,6 +702,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-buscar').addEventListener('click', buscarSitios);
   document.getElementById('btn-skip').addEventListener('click', () => cerrarCita(null));
   document.getElementById('btn-mylocation').addEventListener('click', usarMiUbicacion);
+  document.getElementById('cita-fecha').addEventListener('change', validarCuando);
+  document.getElementById('cita-hora').addEventListener('change', validarCuando);
   document.querySelectorAll('.link-back').forEach((b) => { if (b.dataset.back) b.addEventListener('click', () => goTo(b.dataset.back)); });
 
   // Puerta: resolvemos la invitación ANTES de pintar nada. Así, si el enlace es
