@@ -378,6 +378,14 @@ function renderCitas() {
   });
 }
 
+/* Un dato del detalle. Cada ficha declara lo que ocupa: c1 = una columna,
+   c2 = dos, full = la fila entera. La rejilla es de dos columnas en móvil y
+   de cuatro en pantalla grande, así que los datos cortos van siempre en
+   pareja y el modal se lee por bloques en vez de como una columna infinita. */
+function campo(lbl, val, cls = 'c1') {
+  return `<div class="campo ${cls}"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`;
+}
+
 function editorHTML(r) {
   const sitioLink = (r.sitio_lat && r.sitio_lon) ? enlaceMapa(r.sitio_lat, r.sitio_lon) : '';
   const webLink = r.sitio_web ? `<a href="${escAttr(normalizarUrl(r.sitio_web))}" target="_blank" rel="noopener">ver web</a>` : '';
@@ -405,17 +413,18 @@ function editorHTML(r) {
         <div class="cita-hero-who">
           <h4>${esc(r.nombre) || 'Sin nombre'}</h4>
           <div class="mote">${esc(r.mote) || 'sin mote'}</div>
+          <div class="cita-hero-cat">${fmtCategoria(r.categoria)}</div>
         </div>
       </div>
-      <div><div class="lbl">Categoría</div><div class="val">${fmtCategoria(r.categoria)}</div></div>
-      <div><div class="lbl">Contacto</div><div class="val">${esc(r.contacto) || '<span style="color:var(--muted)">— (solo landing)</span>'}</div></div>
-      <div><div class="lbl">Registrada</div><div class="val">${r.created_at ? fechaHora(r.created_at) : '—'}</div></div>
-      <div><div class="lbl">Cuándo (cita)</div><div class="val">${r.fecha_cita ? fechaHora(r.fecha_cita) : '—'}</div></div>
-      <div><div class="lbl">Horario</div><div class="val">${esc(r.franja) || '—'}</div></div>
-      <div><div class="lbl">Salimos</div><div class="val">${esc(r.salimos) || '—'}</div></div>
-      <div><div class="lbl">Plan</div><div class="val">${esc(r.plan) || '—'} · ${esc(r.antojo) || '—'}</div></div>
-      <div><div class="lbl">Sitio</div><div class="val">${esc(r.sitio) || '—'} ${sitioLink ? '&nbsp; ' + sitioLink : ''} ${webLink ? '&nbsp; ' + webLink : ''}</div></div>
-      <div class="full"><div class="lbl">Zona</div><div class="val">${zonaTexto} ${zonaLink ? '&nbsp; ' + zonaLink : ''}</div></div>
+      ${campo('Cuándo', r.fecha_cita ? fechaHora(r.fecha_cita) : '—')}
+      ${campo('Horario', esc(r.franja) || '—')}
+      ${campo('Vamos a', esc(r.plan) || '—')}
+      ${campo('Me apetece', esc(r.antojo) || '—')}
+      ${campo('Registrada', r.created_at ? fechaHora(r.created_at) : '—')}
+      ${campo('Salimos', esc(r.salimos) || '—')}
+      ${campo('Contacto', esc(r.contacto) || '<span class="dim">— (solo landing)</span>', 'c2')}
+      ${campo('Sitio', `${esc(r.sitio) || '—'}${sitioLink ? ' &nbsp; ' + sitioLink : ''}${webLink ? ' &nbsp; ' + webLink : ''}`, 'c2')}
+      ${campo('Zona', `${zonaTexto}${zonaLink ? ' &nbsp; ' + zonaLink : ''}`, 'c2')}
       <div class="full">
         <div class="lbl">¿Qué tal fue la cita?</div>
         ${ratingHTML(r.nota)}

@@ -181,18 +181,35 @@ table.db tbody tr.row.open { background: rgba(227, 189, 114, 0.14); }
 table.db th.col-foto, table.db td.col-foto { width: 38px; padding-right: 0; }
 table.db th.no-sort { cursor: default; }
 
-/* Cabecera del modal de cita: foto + quién */
-.cita-hero { display: flex; align-items: center; gap: 14px; }
+/* Cabecera del modal de cita: foto + quién + de quién partió la cita */
+.cita-hero {
+  display: flex; align-items: center; gap: 14px;
+  padding-bottom: 16px; border-bottom: 1px solid var(--line);
+}
 .cita-hero-who { min-width: 0; }
 .cita-hero h4 { font-family: var(--title); font-weight: 500; font-size: 1.25rem; color: var(--text); }
 .cita-hero .mote { color: var(--muted); font-weight: 700; font-size: 0.88rem; }
+.cita-hero-cat { margin-top: 6px; }
 
 /* fila expandida */
 tr.detail > td { background: var(--panel-2); padding: 0; border-bottom: 1px solid var(--line); }
-.editor { padding: 20px 22px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 22px; }
+
+/* Detalle de la cita: rejilla de dos columnas (cuatro en pantalla grande).
+   Cada dato dice lo que ocupa (.c1 / .c2 / .full), así en el móvil los datos
+   cortos van de dos en dos y el modal deja de ser una columna con scroll. */
+.editor { padding: 20px 22px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
+.editor .c2 { grid-column: span 2; }
 .editor .full { grid-column: 1 / -1; }
-.editor .lbl { font-size: 0.76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 6px; }
-.editor .val { font-weight: 700; }
+@media (min-width: 820px) { .editor { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 18px; } }
+/* Los datos se ven como fichas y las zonas editables (nota, notas, foto) no:
+   de un vistazo se distingue lo que solo se consulta de lo que se toca. */
+.campo {
+  min-width: 0; padding: 10px 12px; border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2); border: 1px solid var(--line);
+}
+.editor .lbl { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 5px; }
+.editor .val { font-weight: 700; font-size: 0.94rem; line-height: 1.35; }
+.editor .dim { color: var(--muted); font-weight: 700; }
 .editor input, .editor textarea, .editor select {
   width: 100%; background: rgba(0, 0, 0, 0.3); color: var(--text); border: 1px solid var(--line-2);
   border-radius: 10px; padding: 10px 12px; font-family: var(--font); font-weight: 600; font-size: 0.92rem; outline: none;
@@ -444,7 +461,10 @@ table.db tbody tr:last-child td { border-bottom: none; }
   .searchbar { flex: 1 1 100%; }
   .controls .perpage { margin-left: auto; }
   table.db th, table.db td { padding: 9px 7px; font-size: 0.8rem; }
-  .editor { grid-template-columns: 1fr; padding: 16px; gap: 14px; }
+  .editor { padding: 16px; gap: 10px 10px; }
+  .campo { padding: 9px 10px; }
+  .editor .val { font-size: 0.9rem; }
+  .cita-hero { padding-bottom: 12px; }
   .editor-actions { flex-wrap: wrap; }
   .invite-grid { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 12px; }
   .invite-body { padding: 10px 11px 12px; gap: 8px; }
