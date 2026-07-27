@@ -42,7 +42,14 @@
 
   <!-- PANEL -->
   <div id="panel" class="admin" hidden>
-    <aside class="sidebar">
+    <!-- Botón hamburguesa: solo visible en móvil/tablet -->
+    <button id="nav-toggle" class="nav-toggle" type="button"
+            aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar">
+      <span class="bars"><i></i><i></i><i></i></span>
+    </button>
+    <div id="nav-scrim" class="nav-scrim"></div>
+
+    <aside class="sidebar" id="sidebar">
       <div class="logo"><span class="dot" data-icon="heart"></span> Salimos</div>
       <button class="nav-item active" data-view="citas"><span data-icon="area"></span> Citas</button>
       <button class="nav-item" data-view="invitaciones"><span data-icon="clip"></span> Invitaciones</button>

@@ -1,31 +1,20 @@
 Salimos? ----
 
-- [hecho] En la página de "¿Salimos? Sí o No" el "No" cuando se desplaza no puede salir fuera de la pantalla del dispositivo donde se encuentra, nunca.
-
-- [hecho] En móvil estará tan bien hecho que no será necesario el scroll
-
-- [hecho] En la página (independientemente del dispositivo) no será necesario el scroll, si lo es, pon un scroll solo en el contenedor, pero adaptalo para que no sea necesario en la mayoría de ocasiones.
-
 - [revisar] Repasa los iconos SVG por unos más apropiados, si no eres capaz, usa iconos de flaticon.es/ o similares de:
-	. Pasear
-	. Bollería (ahora "Dulce")
-	. Shushi
-	. Hamburguesa
-	. Pizza
-	. Kebab
-	. Italiano
+  . Pasear
+  . Bollería (ahora "Dulce")
+  . Shushi
+  . Hamburguesa
+  . Pizza
+  . Kebab
+  . Italiano
 
-- [hecho] Cambia el nombre:
-	. Bollería -> Dulce
+- El menú en móvil será vertical, no horizontal, y se sacara y se esconderá con una animación a la izquierda
 
-- [hecho] Jamás saldrá un alert para confirmar o rechazar opciones, una ventana modal con opciones si o no, siempre
+- Las citas e invitaciones que tengan foto serán reconocibles en la tabla y ventana modal con su foto.
 
-- [hecho] Si las opciones son impares (como en "Vamos a..." u otra página similar), la última opción saldrá centrada.
+- El menú de invitaciones será una cuadrícula.
 
-- [hecho] En el menú registro de citas, cuando cliques saldrá una ventana modal que se adaptará a cada dispositivo, donde podrás editar algunos campos
+- Desde movil la tabla se simplificará para no tener que hacer scroll horizontal, cuando se pulse la ventana modal se verán todos los datos
 
-- [hecho] La landing page no puede parecer publicidad. En la landing tiene que aparecer un "¿Quedamos?" y el formulario de nombre y Número/Instagram
-
-- [hecho] El estilo no me gusta, preguntame minuciosamente lo que creas necesario, no te limites a cambiar solo el color.
-
-- [hecho] En el mapa no hay iconos para el círculo, cuadrado o borrar la zona, además está mal distribuido.
+Al final de cada cambio, haz commit y confirma

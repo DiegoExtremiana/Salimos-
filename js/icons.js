@@ -11,24 +11,24 @@ const ICON_PATHS = {
   desayunar: '<path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 3v3M5 8l1.6 1.6M19 8l-1.6 1.6"/>',            // amanecer
   comer:     '<path d="M4 3v5a2 2 0 0 0 4 0V3M6 8v13M15 3c-.8 1.3-1 3-1 4.5 0 2 .8 3 2 3.5v10"/>',   // tenedor + cuchillo
   cenar:     '<path d="M20 14A8 8 0 1 1 10.5 4.7 6.2 6.2 0 0 0 20 14Z"/><path d="M18 4l.4 1.2L19.6 6l-1.2.4L18 7.6l-.4-1.2L16.4 6l1.2-.4z"/>', // luna + estrella
-  pasear:    '<circle cx="13" cy="4.5" r="1.6"/><path d="M12.5 8l-2.2 4.2 2.4 2.2.6 6M12.5 8l3 1.8 2.7-1M10.3 12.2l-3 1.4-1.3 4"/>',      // persona andando
+  pasear:    '<circle cx="14" cy="4.2" r="2"/><path d="M13.4 6.8 11.5 12.5l3.5 2 .5 6"/><path d="M11.5 12.5 8.2 15.4 6.6 20.5"/><path d="M12.7 8.6 16.1 10.1 17.2 7.4"/><path d="M12.4 8.9 9.4 10.6 8.6 13.6"/>', // persona andando
   tomar:     '<path d="M5 4h14l-7 8zM12 12v6M8 20h8"/>',                                              // copa cóctel
 
   /* --- Desayuno --- */
   cafe:      '<path d="M4 8h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM17 9h2a2 2 0 0 1 0 4h-2M7 3c-.6.8-.6 1.4 0 2M10 3c-.6.8-.6 1.4 0 2"/>', // taza + vapor
   churros:   '<path d="M6 3.5 5 17M9.5 3.5 8.5 17M13 3.5 12 17M4 20h9a3 3 0 0 0 3-3"/>',              // churros + taza
-  bakery:    '<path d="M3.5 16c1.2-7 16-7 17 0-2.4 2.2-5.5 1.2-8.5-1-3 2.2-6.1 3.2-8.5 1Z"/>',        // croissant
+  bakery:    '<path d="M6.6 13h10.8l-1.2 7H7.8z"/><path d="M6.6 13a3.1 3.1 0 0 1 1.7-2.8 3.5 3.5 0 0 1 3.7-3.3 3.5 3.5 0 0 1 3.7 3.3 3.1 3.1 0 0 1 1.7 2.8"/><path d="M12 6.9V5.2"/><circle cx="12" cy="4.1" r="1.1"/><path d="M10.2 15.6 9.8 18M13.8 15.6l.4 2.4"/>', // cupcake (dulce)
   brunch:    '<path d="M4 14c0 1.8 3.6 3 8 3s8-1.2 8-3M4 11c0 1.8 3.6 3 8 3s8-1.2 8-3M12 5c4.4 0 8 1.3 8 3s-3.6 3-8 3-8-1.3-8-3 3.6-3 8-3ZM12 3v2"/>', // tortitas
 
   /* --- Comida / Cena --- */
   ramen:     '<path d="M3 11h18a9 9 0 0 1-18 0ZM7 11c0-2.2 2-3.4 5-3.4M13 3.5l4 3M11 3.5l4 3"/>',      // cuenco + palillos
-  sushi:     '<path d="M3 13a4 4 0 0 1 4-4h10a4 4 0 0 1 0 8H7a4 4 0 0 1-4-4ZM8.5 9V6.5a3.5 3.5 0 0 1 7 0V9"/>', // nigiri
-  burger:    '<path d="M4 9a8 8 0 0 1 16 0zM4 13h16M5 16h14a2 2 0 0 1-2 3H7a2 2 0 0 1-2-3ZM8.5 8.5h.01M12 8.5h.01M15.5 8.5h.01"/>', // hamburguesa
-  pizza:     '<path d="M12 3 3 20l9-1.8L21 20zM10 9h.01M13.5 12h.01M9 15h.01"/>',                     // porción
+  sushi:     '<circle cx="8.5" cy="12.5" r="5"/><circle cx="8.5" cy="12.5" r="1.9"/><circle cx="17" cy="14.5" r="3.5"/><circle cx="17" cy="14.5" r="1.3"/><path d="M2.5 20.5h19"/>', // makis sobre tabla
+  burger:    '<path d="M3.4 10.2a8.6 8.6 0 0 1 17.2 0z"/><path d="M3.4 13.6q2.15-2 4.3 0t4.3 0 4.3 0 4.3 0"/><path d="M4 17h16v.6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"/><path d="M8.2 7.6h.01M12 6.8h.01M15.8 7.6h.01"/>', // hamburguesa
+  pizza:     '<path d="M12 3.2 4.6 19.6q7.4 3.6 14.8 0z"/><path d="M6.2 16.6q5.8 2.6 11.6 0"/><circle cx="10.4" cy="10.2" r=".95"/><circle cx="13.6" cy="13.2" r=".95"/><circle cx="9.6" cy="14.6" r=".95"/>', // porción con pepperoni
   tapas:     '<path d="M3 16h8M4 16a3 3 0 0 1 6 0M13 16h8M14 16a3 3 0 0 1 6 0M7 13v-1M17 13v-1"/>',   // platillos
   mexican:   '<path d="M3 16a9 9 0 0 1 18 0zM3 16h18M8 13c1.2-1 2.8-1 4 0M12 13c1.2-1 2.8-1 4 0"/>',  // taco
-  kebab:     '<path d="M8 3.2 16 7 8 21zM8 3.2 5.8 7.2 8 21M10 7.5l4 2M9 12.5l4 2"/>',                // durum
-  italian:   '<path d="M3 14h18a9 9 0 0 1-18 0ZM6 11c2-3 4 1 6-1s3 2 6-1"/>',                        // pasta
+  kebab:     '<path d="M12 2.2v2.2M12 17.8V22"/><path d="M12 4.4c3.4 0 5.6 2.2 5.6 5.3 0 4-2 8.1-5.6 8.1s-5.6-4.1-5.6-8.1c0-3.1 2.2-5.3 5.6-5.3Z"/><path d="M7.1 8.6h9.8M6.6 12.4h10.8"/>', // asador vertical de döner
+  italian:   '<path d="M3.5 12.4h17a8.8 8.8 0 0 1-17 0Z"/><path d="M6.2 12.4c.7-2.6 2.6-2.6 3.3 0M10.3 12.4c.7-2.6 2.6-2.6 3.3 0M14.4 12.4c.7-2.6 2.6-2.6 3.3 0"/><path d="M9 3.4c-.7 1-.7 1.7 0 2.7M12 2.8c-.7 1-.7 1.7 0 2.7M15 3.4c-.7 1-.7 1.7 0 2.7"/>', // plato de pasta
 
   /* --- Paseo --- */
   parque:    '<path d="M12 21v-6M8.5 15a4 4 0 0 1-1-7.8 5 5 0 0 1 9.9 0A4 4 0 0 1 15.5 15z"/>',       // árbol

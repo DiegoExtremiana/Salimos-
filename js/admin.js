@@ -263,6 +263,13 @@ async function cerrarSesion() {
 function sesionCaducada() { token = null; localStorage.removeItem(TOKEN_KEY); showLogin(); }
 
 /* ---------- navegación ---------- */
+/* Menú lateral en móvil: cajón deslizante */
+function setNav(abierto) {
+  document.getElementById('panel').classList.toggle('nav-open', abierto);
+  document.getElementById('nav-toggle').setAttribute('aria-expanded', abierto ? 'true' : 'false');
+}
+function navAbierto() { return document.getElementById('panel').classList.contains('nav-open'); }
+
 function setView(view) {
   document.querySelectorAll('.nav-item[data-view]').forEach((b) => b.classList.toggle('active', b.dataset.view === view));
   document.getElementById('view-citas').hidden = view !== 'citas';
@@ -512,7 +519,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('login-form').addEventListener('submit', iniciarSesion);
   document.getElementById('btn-logout').addEventListener('click', cerrarSesion);
-  document.querySelectorAll('.nav-item[data-view]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
+  document.querySelectorAll('.nav-item[data-view]').forEach((b) => b.addEventListener('click', () => { setView(b.dataset.view); setNav(false); }));
+
+  document.getElementById('nav-toggle').addEventListener('click', () => setNav(!navAbierto()));
+  document.getElementById('nav-scrim').addEventListener('click', () => setNav(false));
+  window.addEventListener('resize', () => { if (window.innerWidth > 900) setNav(false); });
+
   document.getElementById('btn-refresh').addEventListener('click', loadCitas);
   document.getElementById('q').addEventListener('input', renderCitas);
   document.getElementById('perpage').addEventListener('change', renderCitas);
@@ -530,6 +542,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.key !== 'Escape') return;
     if (!document.getElementById('modal-cita').hidden) cerrarModalCita();
     else if (!document.getElementById('modal').hidden) cerrarModal();
+    else if (navAbierto()) setNav(false);
   });
 
   // ¿Token guardado y válido?
